@@ -73,26 +73,15 @@ public class ProfilerClient {
         }
         
         void topThree (String song) {
-        	System.out.println(profilerImpl.getTopThreeUsersBySong(song));
+        	String[] top3 = (profilerImpl.getTopThreeUsersBySong(song)).split("\n");
+        	loadPrompt();
+        	System.out.println("Song " + song);
+        	for (String go : top3) {
+        		String[] wow = go.split("\t");
+            	System.out.println("User " + wow[0] + " listened " + wow[2] + " times");
+        	}
         }
 	}
-	/*public static class Output implements Runnable {
-
-        public void run() {
-            while(true) {
-                String message = profilerImpl.receiveMessage();
-                if (!message.isEmpty()) {
-                    System.out.println(message);
-                } else {
-                    try {
-                        Thread.sleep(200);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }
-	}*/
 	
 	public static void main(String[] args) {
 		
