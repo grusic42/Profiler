@@ -38,8 +38,8 @@ public class ProfilerClient {
             	System.out.println("Song " + song + " played " + profilerImpl.getTimesPlayed(song) + " times.");
             } else if (str.startsWith(CMD_USER_TIMES_PLAYED)) {
             	String[] sp = str.split(" ");
-            	String user = sp[1];
-            	String song = sp[2];
+            	String user = sp[2];
+            	String song = sp[1];
             	loadPrompt();
             	System.out.println("Song " + song + " played " + profilerImpl.getTimesPlayedByUser(user, song) + " times by user " + user + ".");
             } else if (str.startsWith(CMD_SONG_TOP_3)) {
