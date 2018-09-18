@@ -4,3 +4,4 @@ bin/
 orb.db/
 .project
 .classpath
+train_triplets.txt

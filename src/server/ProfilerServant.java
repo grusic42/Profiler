@@ -21,7 +21,7 @@ public class ProfilerServant extends ProfilerPOA {
 		int sum = 0;
 		
 		try {
-		File file = new File("/root/Documents/INF5020/first assignment/train_triplets.txt");
+		File file = new File("../train_triplets.txt");
 		
 		br = new BufferedReader(new FileReader(file));
 		
@@ -53,7 +53,7 @@ public class ProfilerServant extends ProfilerPOA {
 		int sum = 0;
 		
 		try {
-		File file = new File("/root/Documents/INF5020/first assignment/train_triplets.txt");
+		File file = new File("../train_triplets.txt");
 		
 		br = new BufferedReader(new FileReader(file));
 		
@@ -83,7 +83,7 @@ public class ProfilerServant extends ProfilerPOA {
 		ArrayList<String> matches = new ArrayList<String>();
 		
 		try {
-		File file = new File("/root/Documents/INF5020/first assignment/train_triplets.txt");
+		File file = new File("../train_triplets.txt");
 		
 		br = new BufferedReader(new FileReader(file));
 		
