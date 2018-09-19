@@ -39,6 +39,7 @@ public class ProfilerClient {
                     readInputFile(filename);
             	}else {
                 	parse(s);
+                	
                 }
             }
         }
@@ -66,6 +67,7 @@ public class ProfilerClient {
             }
         }
         
+        //file needs to be in src folder
         void readInputFile(String filename){
         	BufferedReader br = null;
         	try {
@@ -100,6 +102,7 @@ public class ProfilerClient {
             		CMD_TIMES_PLAYED + "[song]\n" +
             		CMD_USER_TIMES_PLAYED + "[song] [user]\n" +
             		CMD_SONG_TOP_3 + "[song]\n" +
+            		CMD_READ_INPUT + "[filename]\n" +
                     CMD_QUIT;
             System.out.println(str);
         }
