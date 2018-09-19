@@ -8,6 +8,10 @@ import org.omg.CosNaming.NamingContextExtHelper;
 import TasteProfile.Profiler;
 import TasteProfile.ProfilerHelper;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.Scanner;
 
 public class ProfilerClient {
@@ -19,6 +23,7 @@ public class ProfilerClient {
     static final String CMD_SONG_TOP_3   = "getTopThreeUsersBySong ";
     static final String CMD_HELP = "help";
     static final String CMD_QUIT = "quit";
+    static final String CMD_READ_INPUT = "inputfile";
 	
 	
 	public static class Input implements Runnable {
@@ -27,7 +32,14 @@ public class ProfilerClient {
             Scanner in = new Scanner(System.in);
             while (true) {
                 String s = in.nextLine();
-                parse(s);
+                if(s.startsWith(CMD_READ_INPUT)){
+                    String filename = s.substring(CMD_READ_INPUT.length()+1);
+                    System.out.println("Reading input from file " + filename);
+                    
+                    readInputFile(filename);
+            	}else {
+                	parse(s);
+                }
             }
         }
 
@@ -38,8 +50,8 @@ public class ProfilerClient {
             	System.out.println("Song " + song + " played " + profilerImpl.getTimesPlayed(song) + " times.");
             } else if (str.startsWith(CMD_USER_TIMES_PLAYED)) {
             	String[] sp = str.split(" ");
-            	String user = sp[2];
-            	String song = sp[1];
+            	String user = sp[1];
+            	String song = sp[2];
             	loadPrompt();
             	System.out.println("Song " + song + " played " + profilerImpl.getTimesPlayedByUser(user, song) + " times by user " + user + ".");
             } else if (str.startsWith(CMD_SONG_TOP_3)) {
@@ -48,11 +60,40 @@ public class ProfilerClient {
             } else if (str.startsWith(CMD_HELP)) {
             	help();
             } else if (str.startsWith(CMD_QUIT)) {
-                System.exit(0);
-            } else {
+            System.exit(0);
+        	}else {
                 profilerImpl.sendMessage(str);
             }
         }
+        
+        void readInputFile(String filename){
+        	BufferedReader br = null;
+        	try {
+        	String filePath = new String("./src/" + filename);
+        	File file = new File(filePath);	
+    		//File file = new File("./src/inputtest.txt");
+    		
+    		br = new BufferedReader(new FileReader(file));
+    		
+    		String lineWithTabs;
+    		while ((lineWithTabs = br.readLine()) != null){
+    			String[] tuple = lineWithTabs.split("\t");
+    			String lineWithSpaces = String.join(" ", tuple);
+    			System.out.println(lineWithSpaces);
+    			parse(lineWithSpaces);
+    		}
+    		} catch (IOException e) {
+    			e.printStackTrace();
+    		}
+    		finally {
+    			try {
+    				br.close();
+    			} catch 
+    			(IOException e) {
+    				e.printStackTrace();
+    			}
+    		}
+    }
 
         void help() {
             String str = "Commands:\n" +

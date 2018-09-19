@@ -5,3 +5,5 @@ orb.db/
 .project
 .classpath
 train_triplets.txt
+input.txt
+inputtest.txt
