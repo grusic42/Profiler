@@ -34,14 +34,12 @@ public class ProfilerClient {
         void parse(String str) {
             if (str.startsWith(CMD_TIMES_PLAYED)) {
             	String song = str.substring(CMD_TIMES_PLAYED.length());
-            	loadPrompt();
-            	System.out.println("Song " + song + " played " + profilerImpl.getTimesPlayed(song) + " times.");
+            	timesPlayed(song);
             } else if (str.startsWith(CMD_USER_TIMES_PLAYED)) {
             	String[] sp = str.split(" ");
             	String user = sp[1];
             	String song = sp[2];
-            	loadPrompt();
-            	System.out.println("Song " + song + " played " + profilerImpl.getTimesPlayedByUser(user, song) + " times by user " + user + ".");
+            	timesPlayedByUser(user, song);
             } else if (str.startsWith(CMD_SONG_TOP_3)) {
                 String song = str.substring(CMD_SONG_TOP_3.length());
                 topThree(song);
@@ -72,13 +70,36 @@ public class ProfilerClient {
         	System.out.println("...[working hard]...");
         }
         
-        void topThree (String song) {
-        	String[] top3 = (profilerImpl.getTopThreeUsersBySong(song)).split("\n");
+        void timesPlayed (String song) {
+        	long startTime = System.currentTimeMillis();
         	loadPrompt();
-        	System.out.println("Song " + song);
+        	int timesPlayed = profilerImpl.getTimesPlayed(song);
+        	long elapsedTime = System.currentTimeMillis() - startTime;
+        	System.out.println("Song " + song + " played " + timesPlayed + " times.(" + elapsedTime  + "ms)");
+        	
+        	
+        }
+        
+        void timesPlayedByUser (String user, String song) {
+        	long startTime = System.currentTimeMillis();
+        	loadPrompt();
+        	int timesPlayed = profilerImpl.getTimesPlayedByUser(user, song);
+        	long elapsedTime = System.currentTimeMillis() - startTime;
+        	if (timesPlayed != 0) {
+        		System.out.println("Song " + song + " played " + timesPlayed + " times by user " + user + ".("+ elapsedTime  + "ms)");
+        	} else System.out.println("Song not played by this user");
+        }
+        
+        void topThree (String song) {
+        	long startTime = System.currentTimeMillis();
+        	loadPrompt();
+        	String[] top3 = (profilerImpl.getTopThreeUsersBySong(song)).split("\n");
+        	long elapsedTime = System.currentTimeMillis() - startTime;
+        	
+        	System.out.println("Song " + song  +" (" + elapsedTime  + "ms)");
         	for (String go : top3) {
         		String[] wow = go.split("\t");
-            	System.out.println("User " + wow[0] + " listened " + wow[2] + " times");
+            	System.out.println("User " + wow[0] + " listened " + wow[2] + " times.");
         	}
         }
 	}
