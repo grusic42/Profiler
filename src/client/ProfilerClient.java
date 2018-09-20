@@ -1,5 +1,6 @@
 package client;
 
+import java.util.Arrays;
 import java.util.Scanner;
 
 import org.omg.CORBA.ORB;
@@ -9,8 +10,10 @@ import org.omg.CosNaming.NamingContextExtHelper;
 import TasteProfile.Profiler;
 import TasteProfile.ProfilerHelper;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Scanner;
 
@@ -27,6 +30,14 @@ public class ProfilerClient {
 	public static class Input implements Runnable {
 
         public void run() {
+        	File file = new File("root/../../output.txt");
+        	try {
+				BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+				writer.write("");
+				writer.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
             Scanner in = new Scanner(System.in);
             while (true) {
                 String s = in.nextLine();
@@ -36,24 +47,30 @@ public class ProfilerClient {
                     
                     readInputFile(filename);
             	}else {
-                	parse(s);
+                	try {
+						parse(s);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
                 	
                 }
             }
         }
 
-        void parse(String str) {
+        void parse(String str) throws IOException {			
+        	File file = new File("root/../../output.txt");
+        	BufferedWriter writer = new BufferedWriter(new FileWriter(file, true));
             if (str.startsWith(CMD_TIMES_PLAYED)) {
             	String song = str.substring(CMD_TIMES_PLAYED.length());
-            	timesPlayed(song);
+            	writer.append(timesPlayed(song) + "\n\n");
             } else if (str.startsWith(CMD_USER_TIMES_PLAYED)) {
             	String[] sp = str.split(" ");
             	String user = sp[1];
             	String song = sp[2];
-            	timesPlayedByUser(user, song);
+            	writer.append(timesPlayedByUser(user, song) + "\n\n");
             } else if (str.startsWith(CMD_SONG_TOP_3)) {
                 String song = str.substring(CMD_SONG_TOP_3.length());
-                topThree(song);
+                writer.append(topThree(song) + "\n");
             } else if (str.startsWith(CMD_HELP)) {
             	help();
             } else if (str.startsWith(CMD_QUIT)) {
@@ -61,6 +78,7 @@ public class ProfilerClient {
         	}else {
                 profilerImpl.sendMessage(str);
             }
+            writer.close();
         }
         
         //file needs to be in src folder
@@ -96,7 +114,7 @@ public class ProfilerClient {
         void help() {
             String str = "Commands:\n" +
             		CMD_TIMES_PLAYED + "[song]\n" +
-            		CMD_USER_TIMES_PLAYED + "[song] [user]\n" +
+            		CMD_USER_TIMES_PLAYED + "[user] [song]\n" +
             		CMD_SONG_TOP_3 + "[song]\n" +
             		CMD_READ_INPUT + "[filename]\n" +
                     CMD_QUIT;
@@ -112,38 +130,51 @@ public class ProfilerClient {
         	System.out.println("...[working hard]...");
         }
         
-        void timesPlayed (String song) {
+        String timesPlayed (String song) {
         	long startTime = System.currentTimeMillis();
         	loadPrompt();
         	int timesPlayed = profilerImpl.getTimesPlayed(song);
         	long elapsedTime = System.currentTimeMillis() - startTime;
-        	System.out.println("Song " + song + " played " + timesPlayed + " times.(" + elapsedTime  + "ms)");
+        	String result = ("Song " + song + " played " + timesPlayed + " times.(" + elapsedTime  + "ms)");
+        	System.out.println(result);
+        	return result;
         	
         	
         }
         
-        void timesPlayedByUser (String user, String song) {
+        String timesPlayedByUser (String user, String song) {
         	long startTime = System.currentTimeMillis();
         	loadPrompt();
         	int timesPlayed = profilerImpl.getTimesPlayedByUser(user, song);
         	long elapsedTime = System.currentTimeMillis() - startTime;
+        	String result1 = ("Song " + song + " played " + timesPlayed + " times by user " + user + ".("+ elapsedTime  + "ms)");
+        	String result2 = ("Song " + song + " not played by user " + user + ". ("+ elapsedTime  + "ms");
         	if (timesPlayed != 0) {
-        		System.out.println("Song " + song + " played " + timesPlayed + " times by user " + user + ".("+ elapsedTime  + "ms)");
-        	} else System.out.println("Song not played by this user");
+        		System.out.println(result1);
+        		return result1;
+        	} else System.out.println(result2);
+        	return result2;
+        	 
         }
         
-        void topThree (String song) {
-        	long startTime = System.currentTimeMillis();
-        	loadPrompt();
-        	String[] top3 = (profilerImpl.getTopThreeUsersBySong(song)).split("\n");
-        	long elapsedTime = System.currentTimeMillis() - startTime;
-        	
-        	System.out.println("Song " + song  +" (" + elapsedTime  + "ms)");
-        	for (String go : top3) {
-        		String[] wow = go.split("\t");
-            	System.out.println("User " + wow[0] + " listened " + wow[2] + " times.");
-        	}
-        }
+        String topThree(String song) {
+			long startTime = System.currentTimeMillis();
+			loadPrompt();
+			String[] top3 = (profilerImpl.getTopThreeUsersBySong(song)).split("\n");
+			long elapsedTime = System.currentTimeMillis() - startTime;
+			StringBuilder result = new StringBuilder();
+			String initialmessage = ("Song " + song + " (" + elapsedTime + "ms)");
+			System.out.println(initialmessage);
+			result.append(initialmessage + "\n");
+			for (String go : top3) {
+				String[] wow = go.split("\t");
+				String resultline = ("User " + wow[0] + " listened " + wow[2] + " times.");
+				System.out.println(resultline);
+				result.append(resultline + "\n");
+				
+			}
+			return result.toString();
+		}
 	}
 
 	public static void main(String[] args) {

@@ -16,6 +16,11 @@ public class ProfilerServant extends ProfilerPOA {
 		class UserCounter {
 			public String user_id;
 			public long song_play_time;
+			
+			public UserCounter(String user, long amount){
+			user_id = user;
+			song_play_time = amount;
+		}
 		}
 		
 		class TopThree {
