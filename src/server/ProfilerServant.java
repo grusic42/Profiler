@@ -7,8 +7,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
 
 import TasteProfile.ProfilerPOA;
 
@@ -53,6 +51,7 @@ public class ProfilerServant extends ProfilerPOA {
 	}
 	*/
 
+
 	@Override
 	public String sendMessage(String message) {
 		// TODO Auto-generated method stub
@@ -61,7 +60,9 @@ public class ProfilerServant extends ProfilerPOA {
 
 	@Override
 	public int getTimesPlayed(String song_id) {
+
 		fakeNetworkLatency();
+		
 		BufferedReader br = null;
 		int sum = 0;
 
@@ -90,8 +91,9 @@ public class ProfilerServant extends ProfilerPOA {
 
 	@Override
 	public int getTimesPlayedByUser(String user_id, String song_id) {
-
+		
 		fakeNetworkLatency();
+
 		BufferedReader br = null;
 		int sum = 0;
 
@@ -120,12 +122,14 @@ public class ProfilerServant extends ProfilerPOA {
 
 	@Override
 	public String getTopThreeUsersBySong(String song_id) {
-		
+
 		BufferedReader br = null;
 		ArrayList<String> matches = new ArrayList<String>();
 
 		try {
+
 			fakeNetworkLatency();
+
 			File file = new File("root/../../train_triplets.txt");
 
 			br = new BufferedReader(new FileReader(file));
@@ -135,7 +139,6 @@ public class ProfilerServant extends ProfilerPOA {
 				String[] tuple = st.split("\t");
 				if (song_id.equals(tuple[1]))
 					matches.add(st);
-
 			}
 
 			// Sorts song array asc order
@@ -148,6 +151,8 @@ public class ProfilerServant extends ProfilerPOA {
 				}
 			});
 
+			// Sends back the list's last three users, i.e. the ones who has the most song
+			// plays
 			StringBuilder sb = new StringBuilder();
 			for (int i = matches.size() - 3; i < matches.size(); i++) {
 				{
@@ -157,20 +162,18 @@ public class ProfilerServant extends ProfilerPOA {
 			}
 			return sb.toString();
 		} catch (IOException e) {
+
 			e.printStackTrace();
 		} finally {
-				try {
-					br.close();
-				} catch 
-				(IOException e) {
-					e.printStackTrace();
-				}
+			try {
+				br.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 		return null;
 	}
-	
-	
-	
+
 	private void fakeNetworkLatency() {
 		try {
 			Thread.sleep(80);
@@ -178,7 +181,5 @@ public class ProfilerServant extends ProfilerPOA {
 			e.printStackTrace();
 		}
 	}
-	
-	
 
 }
