@@ -1,8 +1,10 @@
 package server;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,10 +28,26 @@ class UserProfile implements Comparable<UserProfile> {
 	public long total_play_count = 0;
 	public List<Song> songs = new ArrayList<Song>();
 
+	public UserProfile(String pid) {
+		id = pid;
+	}
+
 	public UserProfile(String pid, long ptotal_play_count, String pSongID, int pSongCount) {
 		id = pid;
 		total_play_count = ptotal_play_count;
 		songs.add(new Song(pSongID, pSongCount));
+	}
+
+	public String toString() {
+		String str = "";
+		str += id + " ";
+		str += total_play_count + " ";
+		str += songs.size() + " ";
+		for (int i = 0; i < songs.size(); i++) {
+			str += songs.get(i).id + " " + songs.get(i).play_count + " ";
+		}
+
+		return str;
 	}
 
 	public int compareTo(UserProfile other) {
@@ -49,7 +67,10 @@ public class ProfilerServant extends ProfilerPOA {
 
 	public ProfilerServant() {
 		cacheUserProfiles = new ArrayList<UserProfile>();
-		LoadCacheUserProfiles();
+		if (!readCacheUserProfiles()) {
+			LoadCacheUserProfiles();
+			writeCacheUserProfiles();
+		}
 	}
 
 	/*
@@ -200,6 +221,65 @@ public class ProfilerServant extends ProfilerPOA {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+	}
+
+	boolean readCacheUserProfiles() {
+		String str = null;
+		String[] tuple;
+		BufferedReader reader;
+		UserProfile tempUserProfile;
+		try {
+			reader = new BufferedReader(new FileReader("root/../../UserProfileCache.txt"));
+			str = reader.readLine();
+			if (str.startsWith("Cached UserProfiles")) {
+				System.out.println("...[File read, success]...");
+				cacheUserProfiles = new ArrayList<UserProfile>();
+			} else {
+				reader.close();
+				return false;
+			}
+			while ((str = reader.readLine()) != null) {
+				int songCount = 0;
+				tuple = str.split(" ");
+				tempUserProfile = new UserProfile(tuple[0]);
+				tempUserProfile.total_play_count = Integer.parseInt(tuple[1]);
+				songCount = Integer.parseInt(tuple[2]);
+				for (int i = 3; i < songCount + 3; i += 2) {
+					tempUserProfile.songs.add(new Song(tuple[i], Integer.parseInt(tuple[i + 1])));
+				}
+				cacheUserProfiles.add(tempUserProfile);
+
+			}
+
+			reader.close();
+			return true;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
+		}
+
+	}
+
+	void writeCacheUserProfiles() {
+
+		BufferedWriter writer;
+		try {
+			writer = new BufferedWriter(new FileWriter("root/../../UserProfileCache.txt"));
+
+			writer.write("Cached UserProfiles " + cacheUserProfiles.size() + " entries.");
+			writer.newLine();
+			for (int i = 0; i < cacheUserProfiles.size(); i++) {
+				writer.write((cacheUserProfiles.get(i).toString()));
+				writer.newLine();
+			}
+
+			writer.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 	}
 
 	void LoadCacheUserProfiles() {
