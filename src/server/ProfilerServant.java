@@ -204,10 +204,14 @@ public class ProfilerServant extends ProfilerPOA {
 
 	void LoadCacheUserProfiles() {
 		BufferedReader br = null;
+		String st;
+		boolean userInCache;
 		int tempPlayTime = 0;
 		long tempTotalPlayTime = 0;
 		String tempUserID = "";
-		ArrayList<Song> tempSongArray = new ArrayList<Song>();
+		String previousUserID = "";
+		ArrayList<Song> tempSongArray;
+		final int CACHE_SIZE = 1000;
 
 		String[] tuple;
 
@@ -215,18 +219,22 @@ public class ProfilerServant extends ProfilerPOA {
 			System.out.println("...[Caching User Profiles]...");
 
 			File file = new File("root/../../train_triplets.txt");
-			boolean userInCache = false;
-			br = new BufferedReader(new FileReader(file));
-			String st;
 
-			while ((st = br.readLine()) != null) {
-				tuple = st.split("\t");
+			br = new BufferedReader(new FileReader(file));
+			st = br.readLine();
+			tuple = st.split("\t");
+			tempUserID = tuple[0];
+			tempPlayTime = Integer.parseInt(tuple[2]);
+			tempSongArray = new ArrayList<Song>();
+			tempSongArray.add(new Song(tuple[1], tempPlayTime));
+			tempTotalPlayTime = tempPlayTime;
+			while (st != null) {
 				userInCache = false;
-				tempPlayTime = Integer.parseInt(tuple[2]);
+
 				for (int i = cacheUserProfiles.size() - 1; i >= 0; i--) {
 					if (cacheUserProfiles.get(i).id.equals(tuple[0])) {
-						cacheUserProfiles.get(i).songs.add(new Song(tuple[1], tempPlayTime));
-						cacheUserProfiles.get(i).total_play_count += tempPlayTime;
+						cacheUserProfiles.get(i).songs.addAll(tempSongArray);
+						cacheUserProfiles.get(i).total_play_count += tempTotalPlayTime;
 						Collections.sort(cacheUserProfiles);
 						userInCache = true;
 						break;
@@ -234,28 +242,55 @@ public class ProfilerServant extends ProfilerPOA {
 
 				}
 				if (!userInCache) {
-					if (tempUserID.equals(tuple[0])) {
-						tempTotalPlayTime += tempPlayTime;
-						tempSongArray.add(new Song(tuple[1], tempPlayTime));
-					} else {
-						tempSongArray = new ArrayList<Song>();
-						tempUserID = tuple[0];
-						tempTotalPlayTime = tempPlayTime;
-						tempSongArray.add(new Song(tuple[1], tempPlayTime));
-
-					}
-					if (cacheUserProfiles.size() < 1000) {
-						// add it we have room to spare
+					if (cacheUserProfiles.size() < CACHE_SIZE) {
+						// add it, we have room to spare
 						cacheUserProfiles.add(new UserProfile(tuple[0], tempTotalPlayTime, tuple[1], tempPlayTime));
 						Collections.sort(cacheUserProfiles);
-					} else if (cacheUserProfiles.get(999).total_play_count < tempTotalPlayTime) {
+						userInCache = true;
+					} else if (cacheUserProfiles.get(CACHE_SIZE - 1).total_play_count < tempTotalPlayTime) {
 						// replace last with the new one
-						cacheUserProfiles.remove(999);
+						cacheUserProfiles.remove(CACHE_SIZE - 1);
 						cacheUserProfiles.add(new UserProfile(tuple[0], tempTotalPlayTime, tuple[1], tempPlayTime));
 						Collections.sort(cacheUserProfiles);
+						userInCache = true;
 					}
 
 				}
+
+				st = br.readLine(); // read next line of input
+				tuple = st.split("\t");
+				tempUserID = tuple[0];
+				tempPlayTime = Integer.parseInt(tuple[2]);
+				while (st != null && tempUserID.equals(previousUserID)) { // quickly add up sequential usersentries with
+																			// same userId
+
+					if (tempUserID.equals(previousUserID)) {
+						tempSongArray.add(new Song(tuple[1], tempPlayTime));
+						tempTotalPlayTime += tempPlayTime;
+
+						previousUserID = tempUserID;
+						st = br.readLine();
+						if (st == null) {
+							break;
+						}
+						tuple = st.split("\t");
+						tempUserID = tuple[0];
+						tempPlayTime = Integer.parseInt(tuple[2]);
+					} else {
+						tempSongArray = new ArrayList<Song>();
+						tempSongArray.add(new Song(tuple[1], tempPlayTime));
+						tempTotalPlayTime = tempPlayTime;
+
+					}
+
+				}
+				if (previousUserID != tempUserID) {
+					tempSongArray = new ArrayList<Song>();
+					tempSongArray.add(new Song(tuple[1], tempPlayTime));
+					tempTotalPlayTime = tempPlayTime;
+				}
+				previousUserID = tempUserID;
+
 			}
 			System.out.println("...[Done Caching User Profiles]...");
 		} catch (IOException e) {
