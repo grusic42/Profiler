@@ -36,9 +36,9 @@ class UserProfile implements Comparable<UserProfile> {
 		if (total_play_count == other.total_play_count) {
 			return 0;// keep as is
 		} else if (total_play_count > other.total_play_count) {
-			return 1; // this is higher, move up
+			return -1; // this is higher, move up
 		} else {
-			return -1;// this is lower, move down
+			return 1;// this is lower, move down
 		}
 	}
 
