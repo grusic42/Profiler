@@ -136,9 +136,21 @@ public class ProfilerServant extends ProfilerPOA {
 	public int getTimesPlayedByUser(String user_id, String song_id) {
 
 		fakeNetworkLatency();
+		// try to find answer in cache
+		for (int userIterator = 0; userIterator < cacheUserProfiles.size(); userIterator++) {
+			if (cacheUserProfiles.get(userIterator).equals(user_id)) {
+				for (int songIterator = 0; songIterator < cacheUserProfiles.get(userIterator).songs
+						.size(); songIterator++) {
+					if (cacheUserProfiles.get(userIterator).songs.get(songIterator).id.equals(song_id)) {
+						return (int) cacheUserProfiles.get(userIterator).songs.get(songIterator).play_count;
+					}
+				}
+				return -1; // user found in cache but not song || user input error
+			}
 
+		}
+		// user not found in cache. try database
 		BufferedReader br = null;
-		int sum = 0;
 
 		try {
 			File file = new File("root/../../train_triplets.txt");
@@ -149,7 +161,7 @@ public class ProfilerServant extends ProfilerPOA {
 			while ((st = br.readLine()) != null) {
 				String[] tuple = st.split("\t");
 				if (user_id.equals(tuple[0]) && song_id.equals(tuple[1]))
-					sum += Integer.parseInt(tuple[2]);
+					return Integer.parseInt(tuple[2]);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -160,7 +172,7 @@ public class ProfilerServant extends ProfilerPOA {
 				e.printStackTrace();
 			}
 		}
-		return sum;
+		return -2; // error user not found in database
 	}
 
 	@Override
