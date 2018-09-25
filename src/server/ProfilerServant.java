@@ -63,6 +63,7 @@ class UserProfile implements Comparable<UserProfile> {
 }
 
 public class ProfilerServant extends ProfilerPOA {
+
 	List<UserProfile> cacheUserProfiles;
 
 	public ProfilerServant() {
@@ -74,26 +75,49 @@ public class ProfilerServant extends ProfilerPOA {
 	}
 
 	/*
-	 * class UserCounter { public String user_id; public long song_play_time; }
-	 * 
-	 * class TopThree { public UserCounter[] topThreeUsers; }
-	 * 
-	 * class SongProfile { public long total_play_count; public TopThree
-	 * top_three_users; }
-	 * 
-	 * private void loadCache() { BufferedReader br = null; try { File file = new
-	 * File("/root/Documents/INF5020/first assignment/train_triplets.txt");
-	 * 
-	 * br = new BufferedReader(new FileReader(file)); //Map<String,int> userCounter
-	 * = new HashMap<String,int>();
-	 * 
-	 * String st; while ((st = br.readLine()) != null) { String[] tuple =
-	 * st.split("\t"); String user = tuple[0]; String song = tuple[1]; int plays =
-	 * Integer.parseInt(tuple[2]); Map<String, Integer> userCounter = new
-	 * HashMap<>(); userCounter.put(user, plays);
-	 * 
-	 * } } catch (IOException e) { e.printStackTrace(); } }
-	 */
+		class UserCounter {
+			public String user_id;
+			public long song_play_time;
+			
+			public UserCounter(String user, long amount){
+			user_id = user;
+			song_play_time = amount;
+		}
+		}
+		
+		class TopThree {
+			public UserCounter[] topThreeUsers;
+		}
+		
+		class SongProfile {
+			public long total_play_count;
+			public TopThree top_three_users;
+		}
+		 
+	private void loadCache() {
+		BufferedReader br = null;
+		try {
+			File file = new File("/root/Documents/INF5020/first assignment/train_triplets.txt");
+			
+			br = new BufferedReader(new FileReader(file));
+			//Map<String,int> userCounter = new HashMap<String,int>();
+						
+			String st;
+			while ((st = br.readLine()) != null) {
+				String[] tuple = st.split("\t");
+				String user = tuple[0];
+				String song = tuple[1];
+				int plays = Integer.parseInt(tuple[2]);
+				Map<String, Integer> userCounter = new HashMap<>();
+				userCounter.put(user, plays);
+					
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+	}
+	*/
+
 
 	@Override
 	public String sendMessage(String message) {
@@ -105,28 +129,28 @@ public class ProfilerServant extends ProfilerPOA {
 	public int getTimesPlayed(String song_id) {
 
 		fakeNetworkLatency();
-
+		
 		BufferedReader br = null;
 		int sum = 0;
 
 		try {
 			File file = new File("root/../../train_triplets.txt");
-
+		
 			br = new BufferedReader(new FileReader(file));
-
+		
 			String st;
 			while ((st = br.readLine()) != null) {
 				String[] tuple = st.split("\t");
 				if (song_id.equals(tuple[1]))
 					sum += Integer.parseInt(tuple[2]);
-			}
+				}
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
 			try {
-				br.close();
+					br.close();
 			} catch (IOException e) {
-				e.printStackTrace();
+					e.printStackTrace();
 			}
 		}
 		return sum;
@@ -134,7 +158,7 @@ public class ProfilerServant extends ProfilerPOA {
 
 	@Override
 	public int getTimesPlayedByUser(String user_id, String song_id) {
-
+		
 		fakeNetworkLatency();
 		// try to find answer in cache
 		for (int userIterator = 0; userIterator < cacheUserProfiles.size(); userIterator++) {
@@ -182,6 +206,8 @@ public class ProfilerServant extends ProfilerPOA {
 		ArrayList<String> matches = new ArrayList<String>();
 
 		try {
+
+			fakeNetworkLatency();
 
 			File file = new File("root/../../train_triplets.txt");
 
