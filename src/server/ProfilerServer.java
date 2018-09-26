@@ -9,6 +9,7 @@ import org.omg.PortableServer.POAHelper;
 
 import TasteProfile.Profiler;
 import TasteProfile.ProfilerHelper;
+import client.ProfilerClient;
 
 public class ProfilerServer {
 
@@ -31,9 +32,10 @@ public class ProfilerServer {
 			NameComponent path[] = ncRef.to_name( name );
 			ncRef.rebind(path, href);
 			
+			profilerImpl.loadCache();
+			
 			System.out.println("Musical taste profiler server ready and waiting ...");
 			orb.run();
-			
 			
 		} catch(Exception e) {
 			System.err.println("ERROR: " + e.getMessage());

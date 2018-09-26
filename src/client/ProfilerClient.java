@@ -56,20 +56,9 @@ public class ProfilerClient {
 			System.out.println(str);
 		}
 
-		void loadPrompt() {
-			try {
-
-				Thread.sleep(5000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-
-			System.out.println("...[working hard]...");
-		}
 
 		void timesPlayed(String song) {
 			long startTime = System.currentTimeMillis();
-			loadPrompt();
 			int timesPlayed = profilerImpl.getTimesPlayed(song);
 			long elapsedTime = System.currentTimeMillis() - startTime;
 			System.out.println("Song " + song + " played " + timesPlayed + " times.(" + elapsedTime + "ms)");
@@ -78,7 +67,6 @@ public class ProfilerClient {
 
 		void timesPlayedByUser(String user, String song) {
 			long startTime = System.currentTimeMillis();
-			loadPrompt();
 			int timesPlayed = profilerImpl.getTimesPlayedByUser(user, song);
 			long elapsedTime = System.currentTimeMillis() - startTime;
 			if (timesPlayed != 0) {
@@ -90,7 +78,6 @@ public class ProfilerClient {
 
 		void topThree(String song) {
 			long startTime = System.currentTimeMillis();
-			loadPrompt();
 			String[] top3 = (profilerImpl.getTopThreeUsersBySong(song)).split("\n");
 			long elapsedTime = System.currentTimeMillis() - startTime;
 
