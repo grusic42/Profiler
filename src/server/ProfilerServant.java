@@ -32,10 +32,10 @@ class UserProfile implements Comparable<UserProfile> {
 		id = pid;
 	}
 
-	public UserProfile(String pid, long ptotal_play_count, String pSongID, int pSongCount) {
+	public UserProfile(String pid, long ptotal_play_count) {
 		id = pid;
 		total_play_count = ptotal_play_count;
-		songs.add(new Song(pSongID, pSongCount));
+		songs = new ArrayList<Song>();
 	}
 
 	public String toString() {
@@ -75,49 +75,29 @@ public class ProfilerServant extends ProfilerPOA {
 	}
 
 	/*
-		class UserCounter {
-			public String user_id;
-			public long song_play_time;
-			
-			public UserCounter(String user, long amount){
-			user_id = user;
-			song_play_time = amount;
-		}
-		}
-		
-		class TopThree {
-			public UserCounter[] topThreeUsers;
-		}
-		
-		class SongProfile {
-			public long total_play_count;
-			public TopThree top_three_users;
-		}
-		 
-	private void loadCache() {
-		BufferedReader br = null;
-		try {
-			File file = new File("/root/Documents/INF5020/first assignment/train_triplets.txt");
-			
-			br = new BufferedReader(new FileReader(file));
-			//Map<String,int> userCounter = new HashMap<String,int>();
-						
-			String st;
-			while ((st = br.readLine()) != null) {
-				String[] tuple = st.split("\t");
-				String user = tuple[0];
-				String song = tuple[1];
-				int plays = Integer.parseInt(tuple[2]);
-				Map<String, Integer> userCounter = new HashMap<>();
-				userCounter.put(user, plays);
-					
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-	}
-	*/
-
+	 * class UserCounter { public String user_id; public long song_play_time;
+	 * 
+	 * public UserCounter(String user, long amount){ user_id = user; song_play_time
+	 * = amount; } }
+	 * 
+	 * class TopThree { public UserCounter[] topThreeUsers; }
+	 * 
+	 * class SongProfile { public long total_play_count; public TopThree
+	 * top_three_users; }
+	 * 
+	 * private void loadCache() { BufferedReader br = null; try { File file = new
+	 * File("/root/Documents/INF5020/first assignment/train_triplets.txt");
+	 * 
+	 * br = new BufferedReader(new FileReader(file)); //Map<String,int> userCounter
+	 * = new HashMap<String,int>();
+	 * 
+	 * String st; while ((st = br.readLine()) != null) { String[] tuple =
+	 * st.split("\t"); String user = tuple[0]; String song = tuple[1]; int plays =
+	 * Integer.parseInt(tuple[2]); Map<String, Integer> userCounter = new
+	 * HashMap<>(); userCounter.put(user, plays);
+	 * 
+	 * } } catch (IOException e) { e.printStackTrace(); } }
+	 */
 
 	@Override
 	public String sendMessage(String message) {
@@ -129,28 +109,28 @@ public class ProfilerServant extends ProfilerPOA {
 	public int getTimesPlayed(String song_id) {
 
 		fakeNetworkLatency();
-		
+
 		BufferedReader br = null;
 		int sum = 0;
 
 		try {
 			File file = new File("root/../../train_triplets.txt");
-		
+
 			br = new BufferedReader(new FileReader(file));
-		
+
 			String st;
 			while ((st = br.readLine()) != null) {
 				String[] tuple = st.split("\t");
 				if (song_id.equals(tuple[1]))
 					sum += Integer.parseInt(tuple[2]);
-				}
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
 			try {
-					br.close();
+				br.close();
 			} catch (IOException e) {
-					e.printStackTrace();
+				e.printStackTrace();
 			}
 		}
 		return sum;
@@ -158,7 +138,7 @@ public class ProfilerServant extends ProfilerPOA {
 
 	@Override
 	public int getTimesPlayedByUser(String user_id, String song_id) {
-		
+
 		fakeNetworkLatency();
 		// try to find answer in cache
 		for (int userIterator = 0; userIterator < cacheUserProfiles.size(); userIterator++) {
@@ -269,9 +249,14 @@ public class ProfilerServant extends ProfilerPOA {
 		try {
 			reader = new BufferedReader(new FileReader("root/../../UserProfileCache.txt"));
 			str = reader.readLine();
-			if (str.startsWith("Cached UserProfiles")) {
-				System.out.println("...[File read, success]...");
-				cacheUserProfiles = new ArrayList<UserProfile>();
+			if (str != null) {
+				if (str.startsWith("Cached UserProfiles")) {
+					System.out.println("...[File read, success]...");
+					cacheUserProfiles = new ArrayList<UserProfile>();
+				} else {
+					reader.close();
+					return false;
+				}
 			} else {
 				reader.close();
 				return false;
@@ -343,69 +328,69 @@ public class ProfilerServant extends ProfilerPOA {
 			tuple = st.split("\t");
 			tempUserID = tuple[0];
 			tempPlayTime = Integer.parseInt(tuple[2]);
-			tempSongArray = new ArrayList<Song>();
-			tempSongArray.add(new Song(tuple[1], tempPlayTime));
 			tempTotalPlayTime = tempPlayTime;
+			tempSongArray = new ArrayList<Song>();
+			cacheUserProfiles.add(new UserProfile(tempUserID, tempTotalPlayTime));
+			cacheUserProfiles.get(0).songs.add(new Song(tuple[1], tempPlayTime));
 			while (st != null) {
 				userInCache = false;
 
-				for (int i = cacheUserProfiles.size() - 1; i >= 0; i--) {
-					if (cacheUserProfiles.get(i).id.equals(tuple[0])) {
-						cacheUserProfiles.get(i).songs.addAll(tempSongArray);
-						cacheUserProfiles.get(i).total_play_count += tempTotalPlayTime;
-						Collections.sort(cacheUserProfiles);
-						userInCache = true;
-						break;
-					}
-
-				}
-				if (!userInCache) {
-					if (cacheUserProfiles.size() < CACHE_SIZE) {
-						// add it, we have room to spare
-						cacheUserProfiles.add(new UserProfile(tuple[0], tempTotalPlayTime, tuple[1], tempPlayTime));
-						Collections.sort(cacheUserProfiles);
-						userInCache = true;
-					} else if (cacheUserProfiles.get(CACHE_SIZE - 1).total_play_count < tempTotalPlayTime) {
-						// replace last with the new one
-						cacheUserProfiles.remove(CACHE_SIZE - 1);
-						cacheUserProfiles.add(new UserProfile(tuple[0], tempTotalPlayTime, tuple[1], tempPlayTime));
-						Collections.sort(cacheUserProfiles);
-						userInCache = true;
-					}
-
-				}
-
 				st = br.readLine(); // read next line of input
-				tuple = st.split("\t");
-				tempUserID = tuple[0];
-				tempPlayTime = Integer.parseInt(tuple[2]);
+				if (st != null) {
+					tuple = st.split("\t");
+					tempUserID = tuple[0];
+					tempPlayTime = Integer.parseInt(tuple[2]);
+				}
 				while (st != null && tempUserID.equals(previousUserID)) { // quickly add up sequential usersentries with
 																			// same userId
 
-					if (tempUserID.equals(previousUserID)) {
-						tempSongArray.add(new Song(tuple[1], tempPlayTime));
-						tempTotalPlayTime += tempPlayTime;
+					tempSongArray.add(new Song(tuple[1], tempPlayTime));
+					tempTotalPlayTime += tempPlayTime;
 
-						previousUserID = tempUserID;
-						st = br.readLine();
-						if (st == null) {
-							break;
-						}
+					st = br.readLine();
+					if (st != null) {
+
 						tuple = st.split("\t");
 						tempUserID = tuple[0];
 						tempPlayTime = Integer.parseInt(tuple[2]);
-					} else {
-						tempSongArray = new ArrayList<Song>();
-						tempSongArray.add(new Song(tuple[1], tempPlayTime));
-						tempTotalPlayTime = tempPlayTime;
-
 					}
 
 				}
-				if (previousUserID != tempUserID) {
-					tempSongArray = new ArrayList<Song>();
-					tempSongArray.add(new Song(tuple[1], tempPlayTime));
-					tempTotalPlayTime = tempPlayTime;
+				if (previousUserID != tempUserID || st == null) {
+					for (int i = cacheUserProfiles.size() - 1; i >= 0; i--) {
+						if (cacheUserProfiles.get(i).id.equals(tempUserID)) {
+							cacheUserProfiles.get(i).songs.addAll(tempSongArray);
+							cacheUserProfiles.get(i).total_play_count += tempTotalPlayTime;
+							Collections.sort(cacheUserProfiles);
+							userInCache = true;
+							break;
+						}
+
+					}
+					if (!userInCache) {
+						if (cacheUserProfiles.size() < CACHE_SIZE) {
+							// add it, we have room to spare
+							cacheUserProfiles.add(new UserProfile(tempUserID, tempTotalPlayTime));
+							cacheUserProfiles.get(cacheUserProfiles.size() - 1).songs.addAll(tempSongArray);
+							cacheUserProfiles.get(cacheUserProfiles.size() - 1).total_play_count += tempTotalPlayTime;
+							Collections.sort(cacheUserProfiles);
+							userInCache = true;
+						} else if (cacheUserProfiles.get(CACHE_SIZE - 1).total_play_count < tempTotalPlayTime) {
+							// replace last with the new one
+							cacheUserProfiles.remove(CACHE_SIZE - 1);
+							cacheUserProfiles.add(new UserProfile(tempUserID, tempTotalPlayTime));
+							cacheUserProfiles.get(CACHE_SIZE - 1).songs.addAll(tempSongArray);
+							cacheUserProfiles.get(CACHE_SIZE - 1).total_play_count += tempTotalPlayTime;
+							Collections.sort(cacheUserProfiles);
+							userInCache = true;
+						}
+
+					}
+					if (st != null) {
+						tempSongArray = new ArrayList<Song>();
+						tempSongArray.add(new Song(tuple[1], tempPlayTime));
+						tempTotalPlayTime = tempPlayTime;
+					}
 				}
 				previousUserID = tempUserID;
 
