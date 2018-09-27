@@ -68,13 +68,6 @@ public class ProfilerServant extends ProfilerPOA {
 	
   List<UserProfile> cacheUserProfiles;
   
-	class SongProfile {
-		public SongProfile(int totalPlayCount, TopThree topThreeUsers) {
-			this.totalPlayCount = totalPlayCount;
-			this.topThreeUsers = topThreeUsers;
-		}
-	
-
 	public ProfilerServant() {
 		cacheUserProfiles = new ArrayList<UserProfile>();
 		if (!readCacheUserProfiles()) {
@@ -82,9 +75,16 @@ public class ProfilerServant extends ProfilerPOA {
 			writeCacheUserProfiles();
 		}
 	}
-
+  
+	class SongProfile {
 		public int totalPlayCount;
 		public TopThree topThreeUsers;
+		
+		public SongProfile(int totalPlayCount, TopThree topThreeUsers) {
+			this.totalPlayCount = totalPlayCount;
+			this.topThreeUsers = topThreeUsers;
+		}
+
 		
 		public TopThree getTopThreeUsers() {
 			return topThreeUsers;
@@ -98,11 +98,7 @@ public class ProfilerServant extends ProfilerPOA {
 			this.totalPlayCount = totalPlayCount;
 		}
 	}
-	
-	class Song {
-		public String id;
-		public int play_count;
-	}
+
 	
 	class TopThree {
 		public TopThree(List<UserCounter> topThreeList) {
@@ -268,7 +264,7 @@ public class ProfilerServant extends ProfilerPOA {
 
 	@Override
 	public int getTimesPlayedByUser(String user_id, String song_id) {
-
+		
 		fakeNetworkLatency();
 		// try to find answer in cache
 		for (int userIterator = 0; userIterator < cacheUserProfiles.size(); userIterator++) {
@@ -279,23 +275,25 @@ public class ProfilerServant extends ProfilerPOA {
 						return (int) cacheUserProfiles.get(userIterator).songs.get(songIterator).play_count;
 					}
 				}
-				return -1; // user found in cache but not song || user input error
+				// user found in cache but not song || user input error
 			}
 
 		}
 		// user not found in cache. try database
 		BufferedReader br = null;
-
+		
 		try {
-			File file = new File("src/../../train_triplets.txt");
-
+			File file = new File("root/../../train_triplets.txt");
 			br = new BufferedReader(new FileReader(file));
 
+			
 			String st;
 			while ((st = br.readLine()) != null) {
 				String[] tuple = st.split("\t");
-				if (user_id.equals(tuple[0]) && song_id.equals(tuple[1]))
+				if (user_id.equals(tuple[0]) && song_id.equals(tuple[1])) {
+					br.close();
 					return Integer.parseInt(tuple[2]);
+				}
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -306,7 +304,7 @@ public class ProfilerServant extends ProfilerPOA {
 				e.printStackTrace();
 			}
 		}
-		return -2; // error user not found in database
+		return 0; // error user not found in database
 	}
 
 	@Override

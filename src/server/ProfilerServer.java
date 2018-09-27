@@ -35,7 +35,10 @@ public class ProfilerServer {
 			profilerImpl.loadCache();
 			
 			System.out.println("Musical taste profiler server ready and waiting ...");
+			
 			orb.run();
+			
+			
 			
 		} catch(Exception e) {
 			System.err.println("ERROR: " + e.getMessage());
