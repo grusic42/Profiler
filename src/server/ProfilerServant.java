@@ -268,7 +268,7 @@ public class ProfilerServant extends ProfilerPOA {
 						.size(); songIterator++) {
 					if (cacheUserProfiles.get(userIterator).songs.get(songIterator).id.equals(song_id)) {
 						System.out.println("...[cacheHIT, success]...");
-						return (int) cacheUserProfiles.get(userIterator).songs.get(songIterator).play_count;
+						return ((int) (cacheUserProfiles.get(userIterator).songs.get(songIterator).play_count));
 					}
 				}
 				// user found in cache but not song || user input error
