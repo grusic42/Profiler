@@ -30,11 +30,15 @@ public class ProfilerClient {
 	public static class Input implements Runnable {
 
         public void run() {
-        	File file = new File("root/../../output.txt");
+        	File file1 = new File("root/../../output.txt");
+        	File file2 = new File("root/../../topthreeoutput.txt");
         	try {
-				BufferedWriter writer = new BufferedWriter(new FileWriter(file));
-				writer.write("");
-				writer.close();
+				BufferedWriter writer1 = new BufferedWriter(new FileWriter(file1));
+				writer1.write("");
+				writer1.close();
+				BufferedWriter writer2 = new BufferedWriter(new FileWriter(file2));
+				writer2.write("");
+				writer2.close();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -58,27 +62,28 @@ public class ProfilerClient {
     }
 
         void parse(String str) throws IOException {			
-        	File file = new File("root/../../output.txt");
-        	BufferedWriter writer = new BufferedWriter(new FileWriter(file, true));
+        	File file1 = new File("root/../../output.txt");
+        	File file2 = new File("root/../../topthreeoutput.txt");
+        	BufferedWriter writer1 = new BufferedWriter(new FileWriter(file1, true));
+        	BufferedWriter writer2 = new BufferedWriter(new FileWriter(file2, true));
             if (str.startsWith(CMD_TIMES_PLAYED)) {
             	String song = str.substring(CMD_TIMES_PLAYED.length());
-            	writer.append(timesPlayed(song) + "\n\n");
+            	writer1.append(timesPlayed(song) + "\n\n");
             } else if (str.startsWith(CMD_USER_TIMES_PLAYED)) {
             	String[] sp = str.split(" ");
             	String user = sp[1];
             	String song = sp[2];
-            	writer.append(timesPlayedByUser(user, song) + "\n\n");
+            	writer1.append(timesPlayedByUser(user, song) + "\n\n");
             } else if (str.startsWith(CMD_SONG_TOP_3)) {
                 String song = str.substring(CMD_SONG_TOP_3.length());
-                writer.append(topThree(song) + "\n");
+                writer2.append(topThree(song) + "\n");
             } else if (str.startsWith(CMD_HELP)) {
             	help();
             } else if (str.startsWith(CMD_QUIT)) {
             System.exit(0);
-        	}else {
-                profilerImpl.sendMessage(str);
-            }
-            writer.close();
+        	}
+            writer1.close();
+            writer2.close();
         }
         
         //file needs to be in src folder
@@ -151,12 +156,12 @@ public class ProfilerClient {
 			String[] top3 = (profilerImpl.getTopThreeUsersBySong(song)).split("\n");
 			long elapsedTime = System.currentTimeMillis() - startTime;
 			StringBuilder result = new StringBuilder();
-			String initialmessage = ("Song " + song + " (" + elapsedTime + "ms)");
-			System.out.println(initialmessage);
-			result.append(initialmessage + "\n");
+			//String initialmessage = ("Song " + song + " (" + elapsedTime + "ms)");
+			//System.out.println(initialmessage);
+			//result.append(initialmessage + "\n");
 			for (String go : top3) {
 				String[] wow = go.split("\t");
-				String resultline = ("User " + wow[0] + " listened " + wow[2] + " times.");
+				String resultline = ("User " + wow[0] + " listened " + wow[2] + " times to song " + wow[1] + ".");
 				System.out.println(resultline);
 				result.append(resultline + "\n");
 				

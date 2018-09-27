@@ -191,13 +191,7 @@ public class ProfilerServant extends ProfilerPOA {
 					cache.put(songid, songp);
 				}
 			}
-			songp = cache.get("SODDNQT12A6D4F5F7E");
-			top3 = songp.topThreeUsers;
-			System.out.println(top3.topThreeList.size());
-			System.out.println(songp.totalPlayCount);
-			for (UserCounter u : top3.topThreeList) {
-				System.out.println(u.songid_play_time + " " + u.user_id);
-			}
+			
 		}
 		catch 
 		(IOException e) { 
@@ -222,12 +216,7 @@ public class ProfilerServant extends ProfilerPOA {
 		SongProfile song = cache.get(songid);
 		return song.totalPlayCount;
 	}
-	
-	@Override
-	public String sendMessage(String message) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+
 
 	@Override
 	public int getTimesPlayed(String song_id) {
