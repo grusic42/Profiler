@@ -263,7 +263,7 @@ public class ProfilerServant extends ProfilerPOA {
 		fakeNetworkLatency();
 		// try to find answer in cache
 		for (int userIterator = 0; userIterator < cacheUserProfiles.size(); userIterator++) {
-			if (cacheUserProfiles.get(userIterator).equals(user_id)) {
+			if (cacheUserProfiles.get(userIterator).id.equals(user_id)) {
 				for (int songIterator = 0; songIterator < cacheUserProfiles.get(userIterator).songs
 						.size(); songIterator++) {
 					if (cacheUserProfiles.get(userIterator).songs.get(songIterator).id.equals(song_id)) {
