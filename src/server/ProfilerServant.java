@@ -267,6 +267,7 @@ public class ProfilerServant extends ProfilerPOA {
 				for (int songIterator = 0; songIterator < cacheUserProfiles.get(userIterator).songs
 						.size(); songIterator++) {
 					if (cacheUserProfiles.get(userIterator).songs.get(songIterator).id.equals(song_id)) {
+						System.out.println("...[cacheHIT, success]...");
 						return (int) cacheUserProfiles.get(userIterator).songs.get(songIterator).play_count;
 					}
 				}
@@ -286,6 +287,7 @@ public class ProfilerServant extends ProfilerPOA {
 				String[] tuple = st.split("\t");
 				if (user_id.equals(tuple[0]) && song_id.equals(tuple[1])) {
 					br.close();
+					System.out.println("...[CacheMISS, Failure]...");
 					return Integer.parseInt(tuple[2]);
 				}
 			}
