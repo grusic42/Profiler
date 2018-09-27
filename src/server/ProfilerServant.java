@@ -65,9 +65,9 @@ class UserProfile implements Comparable<UserProfile> {
 }
 
 public class ProfilerServant extends ProfilerPOA {
-	
-  List<UserProfile> cacheUserProfiles;
-  
+
+	List<UserProfile> cacheUserProfiles;
+
 	public ProfilerServant() {
 		cacheUserProfiles = new ArrayList<UserProfile>();
 		if (!readCacheUserProfiles()) {
@@ -75,17 +75,16 @@ public class ProfilerServant extends ProfilerPOA {
 			writeCacheUserProfiles();
 		}
 	}
-  
+
 	class SongProfile {
 		public int totalPlayCount;
 		public TopThree topThreeUsers;
-		
+
 		public SongProfile(int totalPlayCount, TopThree topThreeUsers) {
 			this.totalPlayCount = totalPlayCount;
 			this.topThreeUsers = topThreeUsers;
 		}
 
-		
 		public TopThree getTopThreeUsers() {
 			return topThreeUsers;
 		}
@@ -99,7 +98,6 @@ public class ProfilerServant extends ProfilerPOA {
 		}
 	}
 
-	
 	class TopThree {
 		public TopThree(List<UserCounter> topThreeList) {
 			super();
@@ -110,49 +108,50 @@ public class ProfilerServant extends ProfilerPOA {
 
 		public void setTopThreeUsers(List<UserCounter> topThreeList) {
 			this.topThreeList = topThreeList;
-			
+
 		}
 	}
-	
+
 	private Map<String, SongProfile> cache;
-	
+
 	class UserCounter {
 		public UserCounter(String user_id, int songid_play_time) {
 			this.user_id = user_id;
 			this.songid_play_time = songid_play_time;
 		}
+
 		public String user_id;
 		public int songid_play_time;
 	}
-	
+
 	public void loadCache() {
-		BufferedReader br = null; 
+		BufferedReader br = null;
 		try {
 			File file = new File("src/../../train_triplets.txt");
 			br = new BufferedReader(new FileReader(file));
-			
+
 			cache = new HashMap<>();
-			
+
 			TopThree top3;
 			SongProfile songp;
-			
+
 			String st;
 			while ((st = br.readLine()) != null) {
-				String[] tuple = st.split("\t");			
+				String[] tuple = st.split("\t");
 				String userid = tuple[0];
 				String songid = tuple[1];
 				int timesPlayed = Integer.parseInt(tuple[2]);
-				
+
 				List<UserCounter> userList = new ArrayList<UserCounter>();
-				UserCounter user = new UserCounter(userid,timesPlayed);
-				
-				//tests if song already exists in cache
-				if((songp = cache.get(songid)) != null) {
+				UserCounter user = new UserCounter(userid, timesPlayed);
+
+				// tests if song already exists in cache
+				if ((songp = cache.get(songid)) != null) {
 					top3 = songp.topThreeUsers;
 					userList = top3.topThreeList;
-					//if the list of users is 1 or 2, it will fill up
-					if (userList.size() < 3){
-						userList.add(user); 
+					// if the list of users is 1 or 2, it will fill up
+					if (userList.size() < 3) {
+						userList.add(user);
 						Collections.sort(userList, new Comparator<UserCounter>() {
 							@Override
 							public int compare(UserCounter o1, UserCounter o2) {
@@ -160,13 +159,12 @@ public class ProfilerServant extends ProfilerPOA {
 								Integer a2 = o2.songid_play_time;
 								return Integer.valueOf(a1).compareTo(Integer.valueOf(a2));
 							}
-						}); 
+						});
 						top3.setTopThreeUsers(userList);
-						songp.setTotalPlayCount(songp.totalPlayCount + timesPlayed);  
+						songp.setTotalPlayCount(songp.totalPlayCount + timesPlayed);
 						cache.replace(songid, songp);
-					} 
-					else {
-						//if 3 users already exists, the one with the least plays, will be replaced
+					} else {
+						// if 3 users already exists, the one with the least plays, will be replaced
 						if (user.songid_play_time > userList.get(0).songid_play_time) {
 							userList.set(0, user);
 							Collections.sort(userList, new Comparator<UserCounter>() {
@@ -176,18 +174,18 @@ public class ProfilerServant extends ProfilerPOA {
 									Integer a2 = o2.songid_play_time;
 									return Integer.valueOf(a1).compareTo(Integer.valueOf(a2));
 								}
-							});	
+							});
 						}
 						top3.setTopThreeUsers(userList);
-						songp.setTotalPlayCount(songp.totalPlayCount + timesPlayed); 
+						songp.setTotalPlayCount(songp.totalPlayCount + timesPlayed);
 						cache.replace(songid, songp);
 					}
 				}
 				// If the song is not yet in the cache
-				else { 
+				else {
 					userList.add(user);
 					top3 = new TopThree(userList);
-					songp = new SongProfile(timesPlayed,top3);
+					songp = new SongProfile(timesPlayed, top3);
 					cache.put(songid, songp);
 				}
 			}
@@ -198,15 +196,13 @@ public class ProfilerServant extends ProfilerPOA {
 			for (UserCounter u : top3.topThreeList) {
 				System.out.println(u.songid_play_time + " " + u.user_id);
 			}
-		}
-		catch 
-		(IOException e) { 
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+
 	}
-	
-	private String checkSongCache (String songid) {
+
+	private String checkSongCache(String songid) {
 		SongProfile song = cache.get(songid);
 		TopThree tp = song.topThreeUsers;
 		StringBuilder sb = new StringBuilder();
@@ -217,12 +213,12 @@ public class ProfilerServant extends ProfilerPOA {
 		System.out.println(sb.toString());
 		return sb.toString();
 	}
-	
-	private int checkPlayedCache (String songid) {
+
+	private int checkPlayedCache(String songid) {
 		SongProfile song = cache.get(songid);
 		return song.totalPlayCount;
 	}
-	
+
 	@Override
 	public String sendMessage(String message) {
 		// TODO Auto-generated method stub
@@ -236,18 +232,17 @@ public class ProfilerServant extends ProfilerPOA {
 
 		BufferedReader br = null;
 		int sum = 0;
-		
+
 		try {
-			
+
 			if ((sum = checkPlayedCache(song_id)) != 0) {
 				return sum;
-			}
-			else {
-			
+			} else {
+
 				File file = new File("src/../../train_triplets.txt");
-	
+
 				br = new BufferedReader(new FileReader(file));
-	
+
 				String st;
 				while ((st = br.readLine()) != null) {
 					String[] tuple = st.split("\t");
@@ -258,13 +253,13 @@ public class ProfilerServant extends ProfilerPOA {
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
-		} 
+		}
 		return sum;
 	}
 
 	@Override
 	public int getTimesPlayedByUser(String user_id, String song_id) {
-		
+
 		fakeNetworkLatency();
 		// try to find answer in cache
 		for (int userIterator = 0; userIterator < cacheUserProfiles.size(); userIterator++) {
@@ -281,12 +276,11 @@ public class ProfilerServant extends ProfilerPOA {
 		}
 		// user not found in cache. try database
 		BufferedReader br = null;
-		
+
 		try {
 			File file = new File("root/../../train_triplets.txt");
 			br = new BufferedReader(new FileReader(file));
 
-			
 			String st;
 			while ((st = br.readLine()) != null) {
 				String[] tuple = st.split("\t");
@@ -312,21 +306,20 @@ public class ProfilerServant extends ProfilerPOA {
 
 		BufferedReader br = null;
 		ArrayList<String> matches = new ArrayList<String>();
-		
+
 		String cache;
 
 		try {
 
 			fakeNetworkLatency();
-			
+
 			if ((cache = checkSongCache(song_id)) != null) {
 				return cache;
-			}
-			else {
+			} else {
 				File file = new File("src/../../train_triplets.txt");
-	
+
 				br = new BufferedReader(new FileReader(file));
-	
+
 				String st;
 				while ((st = br.readLine()) != null) {
 					String[] tuple = st.split("\t");
@@ -342,8 +335,9 @@ public class ProfilerServant extends ProfilerPOA {
 						return Integer.valueOf(a1).compareTo(Integer.valueOf(a2));
 					}
 				});
-	
-				// Sends back the list's last three users, i.e. the ones who has the most song plays
+
+				// Sends back the list's last three users, i.e. the ones who has the most song
+				// plays
 				StringBuilder sb = new StringBuilder();
 				for (int i = matches.size() - 3; i < matches.size(); i++) {
 					{
@@ -357,7 +351,7 @@ public class ProfilerServant extends ProfilerPOA {
 		} catch (IOException e) {
 
 			e.printStackTrace();
-		} 
+		}
 		return null;
 	}
 
@@ -434,13 +428,14 @@ public class ProfilerServant extends ProfilerPOA {
 	}
 
 	void LoadCacheUserProfiles() {
+
 		BufferedReader br = null;
 		String st;
 		boolean userInCache;
 		int tempPlayTime = 0;
 		long tempTotalPlayTime = 0;
 		String tempUserID = "";
-		String previousUserID = "";
+		// String previousUserID = "";
 		ArrayList<Song> tempSongArray;
 		final int CACHE_SIZE = 1000;
 
@@ -455,36 +450,40 @@ public class ProfilerServant extends ProfilerPOA {
 			st = br.readLine();
 			tuple = st.split("\t");
 			tempUserID = tuple[0];
+
 			tempPlayTime = Integer.parseInt(tuple[2]);
-			tempTotalPlayTime = tempPlayTime;
+			tempTotalPlayTime = 0;
 			tempSongArray = new ArrayList<Song>();
-			cacheUserProfiles.add(new UserProfile(tempUserID, tempTotalPlayTime));
+			cacheUserProfiles.add(new UserProfile(tempUserID, tempPlayTime));
 			cacheUserProfiles.get(0).songs.add(new Song(tuple[1], tempPlayTime));
 			while (st != null) {
-				userInCache = false;
 
 				st = br.readLine(); // read next line of input
 				if (st != null) {
 					tuple = st.split("\t");
-					tempUserID = tuple[0];
-					tempPlayTime = Integer.parseInt(tuple[2]);
+					if (tuple[0].equals(tempUserID)) {
+						tempUserID = tuple[0];
+					}
 				}
-				while (st != null && tempUserID.equals(previousUserID)) { // quickly add up sequential usersentries with
-																			// same userId
+				while (st != null && tempUserID.equals(tuple[0])) { // quickly add up sequential usersentries with
+																	// same userId
 
-					tempSongArray.add(new Song(tuple[1], tempPlayTime));
-					tempTotalPlayTime += tempPlayTime;
+					tempSongArray.add(new Song(tuple[1], Integer.parseInt(tuple[2])));
+					tempTotalPlayTime += Integer.parseInt(tuple[2]);
 
 					st = br.readLine();
 					if (st != null) {
-
 						tuple = st.split("\t");
-						tempUserID = tuple[0];
-						tempPlayTime = Integer.parseInt(tuple[2]);
+						if (tuple[0].equals(tempUserID)) {
+							tempUserID = tuple[0];
+						}
+
 					}
 
 				}
-				if (previousUserID != tempUserID || st == null) {
+				if (tempUserID != tuple[0] || st == null) {
+
+					userInCache = false;
 					for (int i = cacheUserProfiles.size() - 1; i >= 0; i--) {
 						if (cacheUserProfiles.get(i).id.equals(tempUserID)) {
 							cacheUserProfiles.get(i).songs.addAll(tempSongArray);
@@ -500,7 +499,7 @@ public class ProfilerServant extends ProfilerPOA {
 							// add it, we have room to spare
 							cacheUserProfiles.add(new UserProfile(tempUserID, tempTotalPlayTime));
 							cacheUserProfiles.get(cacheUserProfiles.size() - 1).songs.addAll(tempSongArray);
-							cacheUserProfiles.get(cacheUserProfiles.size() - 1).total_play_count += tempTotalPlayTime;
+							cacheUserProfiles.get(cacheUserProfiles.size() - 1).total_play_count = tempTotalPlayTime;
 							Collections.sort(cacheUserProfiles);
 							userInCache = true;
 						} else if (cacheUserProfiles.get(CACHE_SIZE - 1).total_play_count < tempTotalPlayTime) {
@@ -508,7 +507,7 @@ public class ProfilerServant extends ProfilerPOA {
 							cacheUserProfiles.remove(CACHE_SIZE - 1);
 							cacheUserProfiles.add(new UserProfile(tempUserID, tempTotalPlayTime));
 							cacheUserProfiles.get(CACHE_SIZE - 1).songs.addAll(tempSongArray);
-							cacheUserProfiles.get(CACHE_SIZE - 1).total_play_count += tempTotalPlayTime;
+							cacheUserProfiles.get(CACHE_SIZE - 1).total_play_count = tempTotalPlayTime;
 							Collections.sort(cacheUserProfiles);
 							userInCache = true;
 						}
@@ -520,7 +519,7 @@ public class ProfilerServant extends ProfilerPOA {
 						tempTotalPlayTime = tempPlayTime;
 					}
 				}
-				previousUserID = tempUserID;
+				tempUserID = tuple[0];
 
 			}
 			System.out.println("...[Done Caching User Profiles]...");
