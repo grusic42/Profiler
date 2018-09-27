@@ -517,8 +517,8 @@ public class ProfilerServant extends ProfilerPOA {
 					}
 					if (st != null) {
 						tempSongArray = new ArrayList<Song>();
-						tempSongArray.add(new Song(tuple[1], tempPlayTime));
-						tempTotalPlayTime = tempPlayTime;
+						tempSongArray.add(new Song(tuple[1], Integer.parseInt(tuple[2])));
+						tempTotalPlayTime = Integer.parseInt(tuple[2]);
 					}
 				}
 				tempUserID = tuple[0];
