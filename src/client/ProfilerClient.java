@@ -38,24 +38,24 @@ public class ProfilerClient {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-            Scanner in = new Scanner(System.in);
-            while (true) {
-                String s = in.nextLine();
-                if(s.startsWith(CMD_READ_INPUT)){
-                    String filename = s.substring(CMD_READ_INPUT.length());
-                    System.out.println("Reading input from file " + filename);
-                    
-                    readInputFile(filename);
-            	}else {
-                	try {
-						parse(s);
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-                	
-                }
+        Scanner in = new Scanner(System.in);
+        while (true) {
+            String s = in.nextLine();
+            if(s.startsWith(CMD_READ_INPUT)){
+                String filename = s.substring(CMD_READ_INPUT.length());
+                System.out.println("Reading input from file " + filename);
+
+                readInputFile(filename);
+          }else {
+              try {
+        parse(s);
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+
             }
         }
+    }
 
         void parse(String str) throws IOException {			
         	File file = new File("root/../../output.txt");
@@ -121,18 +121,8 @@ public class ProfilerClient {
             System.out.println(str);
         }
         
-        void loadPrompt() {
-        	try {
-				Thread.sleep(5000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-        	System.out.println("...[working hard]...");
-        }
-        
         String timesPlayed (String song) {
         	long startTime = System.currentTimeMillis();
-        	loadPrompt();
         	int timesPlayed = profilerImpl.getTimesPlayed(song);
         	long elapsedTime = System.currentTimeMillis() - startTime;
         	String result = ("Song " + song + " played " + timesPlayed + " times.(" + elapsedTime  + "ms)");
@@ -144,7 +134,6 @@ public class ProfilerClient {
         
         String timesPlayedByUser (String user, String song) {
         	long startTime = System.currentTimeMillis();
-        	loadPrompt();
         	int timesPlayed = profilerImpl.getTimesPlayedByUser(user, song);
         	long elapsedTime = System.currentTimeMillis() - startTime;
         	String result1 = ("Song " + song + " played " + timesPlayed + " times by user " + user + ".("+ elapsedTime  + "ms)");
@@ -157,9 +146,8 @@ public class ProfilerClient {
         	 
         }
         
-        String topThree(String song) {
+    String topThree(String song) {
 			long startTime = System.currentTimeMillis();
-			loadPrompt();
 			String[] top3 = (profilerImpl.getTopThreeUsersBySong(song)).split("\n");
 			long elapsedTime = System.currentTimeMillis() - startTime;
 			StringBuilder result = new StringBuilder();
