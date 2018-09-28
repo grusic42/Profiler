@@ -472,13 +472,12 @@ public class ProfilerServant extends ProfilerPOA {
 	void LoadCacheUserProfiles() {
 
 		BufferedReader br = null;
-		String st;
-		boolean userInCache;
+		String st; // one line string read from file
+		boolean userInCache; // user has been found in cache or not
 		int tempPlayTime = 0;
 		long tempTotalPlayTime = 0;
 		String tempUserID = "";
-		// String previousUserID = "";
-		ArrayList<SongImpl> tempSongArray;
+		ArrayList<SongImpl> tempSongArray; // used to make a list of songs til they can be added to the cache
 		final int CACHE_SIZE = 1000;
 
 		String[] tuple;
@@ -486,19 +485,19 @@ public class ProfilerServant extends ProfilerPOA {
 		try {
 			System.out.println("...[Caching User Profiles]...");
 
-			File file = new File("root/../../train_triplets.txt");
+			File file = new File("root/../../train_triplets.txt"); // input file
 
-			br = new BufferedReader(new FileReader(file));
+			br = new BufferedReader(new FileReader(file)); // first user is read
 			st = br.readLine();
-			tuple = st.split("\t");
+			tuple = st.split("\t"); // [user id, song id, play time]
 			tempUserID = tuple[0];
 
 			tempPlayTime = Integer.parseInt(tuple[2]);
 			tempTotalPlayTime = 0;
 			tempSongArray = new ArrayList<SongImpl>();
-			cacheUserProfiles.add(new UserProfileImpl(tempUserID, tempPlayTime));
+			cacheUserProfiles.add(new UserProfileImpl(tempUserID, tempPlayTime)); // first user is added
 			cacheUserProfiles.get(0).songs.add(new SongImpl(tuple[1], tempPlayTime));
-			while (st != null) {
+			while (st != null) { // while !EOF
 
 				st = br.readLine(); // read next line of input
 				if (st != null) {
@@ -507,36 +506,37 @@ public class ProfilerServant extends ProfilerPOA {
 						tempUserID = tuple[0];
 					}
 				}
-				while (st != null && tempUserID.equals(tuple[0])) { // quickly add up sequential usersentries with
+				while (st != null && tempUserID.equals(tuple[0])) { // quickly add up sequential users entries with
 																	// same userId
 
 					tempSongArray.add(new SongImpl(tuple[1], Integer.parseInt(tuple[2])));
-					tempTotalPlayTime += Integer.parseInt(tuple[2]);
+					tempTotalPlayTime += Integer.parseInt(tuple[2]); // add song and playtime to the user profile being
+																		// processed
 
-					st = br.readLine();
-					if (st != null) {
+					st = br.readLine(); // try to read one more user
+					if (st != null) { // if not equal this will be processed in the next round of the outer while loop
 						tuple = st.split("\t");
-						if (tuple[0].equals(tempUserID)) {
-							tempUserID = tuple[0];
-						}
 
 					}
 
 				}
-				if (tempUserID != tuple[0] || st == null) {
+				if (tempUserID != tuple[0] || st == null) { // if ready to add the userprofile being processed to the
+															// cache
 
-					userInCache = false;
+					userInCache = false; // see if it already exists - it shouldn't but we check anyway - we do not do
+											// this for songs
 					for (int i = cacheUserProfiles.size() - 1; i >= 0; i--) {
-						if (cacheUserProfiles.get(i).id.equals(tempUserID)) {
+						if (cacheUserProfiles.get(i).id.equals(tempUserID)) { // add all the data we collected if we
+																				// find a matching id
 							cacheUserProfiles.get(i).songs.addAll(tempSongArray);
 							cacheUserProfiles.get(i).total_play_count += tempTotalPlayTime;
 							Collections.sort(cacheUserProfiles);
-							userInCache = true;
+							userInCache = true; // this user already exists in cache
 							break;
 						}
 
 					}
-					if (!userInCache) {
+					if (!userInCache) { // if user was not found in cache, atempt to add it
 						if (cacheUserProfiles.size() < CACHE_SIZE) {
 							// add it, we have room to spare
 							cacheUserProfiles.add(new UserProfileImpl(tempUserID, tempTotalPlayTime));
@@ -545,7 +545,7 @@ public class ProfilerServant extends ProfilerPOA {
 							Collections.sort(cacheUserProfiles);
 							userInCache = true;
 						} else if (cacheUserProfiles.get(CACHE_SIZE - 1).total_play_count < tempTotalPlayTime) {
-							// replace last with the new one
+							// replace last with the new one if the new one has a higher total_play_count
 							cacheUserProfiles.remove(CACHE_SIZE - 1);
 							cacheUserProfiles.add(new UserProfileImpl(tempUserID, tempTotalPlayTime));
 							cacheUserProfiles.get(CACHE_SIZE - 1).songs.addAll(tempSongArray);
@@ -555,13 +555,14 @@ public class ProfilerServant extends ProfilerPOA {
 						}
 
 					}
-					if (st != null) {
-						tempSongArray = new ArrayList<SongImpl>();
+					if (st != null) { // if going for another round
+						tempSongArray = new ArrayList<SongImpl>(); // reset the temporary list of songs and insert the
+																	// next one
 						tempSongArray.add(new SongImpl(tuple[1], Integer.parseInt(tuple[2])));
 						tempTotalPlayTime = Integer.parseInt(tuple[2]);
 					}
 				}
-				tempUserID = tuple[0];
+				tempUserID = tuple[0]; // prepare more for next round
 
 			}
 			System.out.println("...[Done Caching User Profiles]...");
