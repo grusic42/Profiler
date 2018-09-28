@@ -117,11 +117,4 @@ public class _ProfilerStub extends org.omg.CORBA.portable.ObjectImpl implements 
    }
   }
 
-
-@Override
-public String sendMessage(String message) {
-	// TODO Auto-generated method stub
-	return null;
-}
-
 } // class _ProfilerStub
