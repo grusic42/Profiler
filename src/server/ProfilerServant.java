@@ -72,10 +72,10 @@ public class ProfilerServant extends ProfilerPOA {
 
 	public ProfilerServant() {
 		cacheUserProfiles = new ArrayList<UserProfileImpl>();
-		//if (!readCacheUserProfiles()) {
-		//	LoadCacheUserProfiles();
-		//	writeCacheUserProfiles();
-		//}
+		if (!readCacheUserProfiles()) {
+			LoadCacheUserProfiles();
+			writeCacheUserProfiles();
+		}
 	}
 
 	class SongProfileImpl extends SongProfile {
@@ -189,10 +189,6 @@ public class ProfilerServant extends ProfilerPOA {
 					songCache.put(songid, songp);
 				}
 			}
-			/*
-			for (UserCounterImpl u : top3.topThreeList) {
-				System.out.println(u.songid_play_time + " " + u.user_id);
-			}*/
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

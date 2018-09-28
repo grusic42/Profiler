@@ -30,9 +30,10 @@ public class ProfilerServer {
 			String name = "Profiler";
 			NameComponent path[] = ncRef.to_name( name );
 			ncRef.rebind(path, href);
-			
-			//profilerImpl.loadCache();
-			//profilerImpl.getUserProfile("a17766790b36cb899f152a083389c3111b7ced61");
+			 //load song cache
+			profilerImpl.loadCache();
+			//The getUserProfile function works when you call it from the server, but not from the client, as evidenced by running the below line
+			//System.out.println(profilerImpl.getUserProfile("a17766790b36cb899f152a083389c3111b7ced61").toString()); 
 			System.out.println("Musical taste profiler server ready and waiting ...");
 			
 			orb.run();

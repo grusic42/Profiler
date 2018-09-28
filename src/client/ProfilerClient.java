@@ -87,7 +87,9 @@ public class ProfilerClient {
 		public UserProfile userp;
 
         public void run() {
+        	//output file for getTimesPlayed and getTimesPlayedByUser calls
         	File file1 = new File("root/../../output.txt");
+        	//output file for getTopThreeUsers calls
         	File file2 = new File("root/../../topthreeoutput.txt");
         	try {
 				BufferedWriter writer1 = new BufferedWriter(new FileWriter(file1));
@@ -102,7 +104,9 @@ public class ProfilerClient {
         Scanner in = new Scanner(System.in);
         while (true) {
             String s = in.nextLine();
+            //if input starts with "inputfile"
             if(s.startsWith(CMD_READ_INPUT)){
+            	//get the following filename
                 String filename = s.substring(CMD_READ_INPUT.length());
                 System.out.println("Reading input from file " + filename);
 
@@ -118,8 +122,10 @@ public class ProfilerClient {
         }
     }
 
-        void parse(String str) throws IOException {			
+        void parse(String str) throws IOException {		
+        	//output file for getTimesPlayed and getTimesPlayedByUser calls
         	File file1 = new File("root/../../output.txt");
+        	//output file for getTopThreeUsers calls
         	File file2 = new File("root/../../topthreeoutput.txt");
         	BufferedWriter writer1 = new BufferedWriter(new FileWriter(file1, true));
         	BufferedWriter writer2 = new BufferedWriter(new FileWriter(file2, true));
@@ -147,13 +153,14 @@ public class ProfilerClient {
         void readInputFile(String filename){
         	BufferedReader br = null;
         	try {
+        	//find filename located in src
         	String filePath = new String("./src/" + filename);
         	File file = new File(filePath);	
-    		//File file = new File("./src/inputtest.txt");
     		
     		br = new BufferedReader(new FileReader(file));
     		
     		String lineWithTabs;
+    		//replace tabs with spaces for the parse function
     		while ((lineWithTabs = br.readLine()) != null){
     			String[] tuple = lineWithTabs.split("\t");
     			String lineWithSpaces = String.join(" ", tuple);
@@ -195,9 +202,10 @@ public class ProfilerClient {
         }
         
         String timesPlayedByUser (String user, String song) {
-        	//userp = profilerImpl.getUserProfile(user);
-        	long startTime = System.currentTimeMillis();
-        	int timesPlayed = profilerImpl.getTimesPlayedByUser(user, song);
+        	
+        	long startTime = System.currentTimeMillis();        	
+        	/*
+        	 *** This code should was written for the clientside caching, but seeing as profilerImpl.getUserProfile(user) makes the client crash, we have commented it out ***
         	if(userp!= null && userp.id.equals(user)) {
         		for(Song s : userp.songs) {
         			if(s.id.equals(song)) {
@@ -205,8 +213,12 @@ public class ProfilerClient {
         				return "Song " + song + " played " + s.play_count + " times by user " + user + ".("+ elapsedTime  + "ms)";
         			}
         		}
-        	} //else if()
-        	//userp = profilerImpl.getUserProfile(user);
+        	}
+        	UserProfile userp = profilerImpl.getUserProfile(user);
+			 */
+        	int timesPlayed = profilerImpl.getTimesPlayedByUser(user, song);
+        	
+
         	long elapsedTime = System.currentTimeMillis() - startTime;
         	String result1 = ("Song " + song + " played " + timesPlayed + " times by user " + user + ".("+ elapsedTime  + "ms)");
         	String result2 = ("Song " + song + " not played by user " + user + ". ("+ elapsedTime  + "ms");
@@ -237,9 +249,12 @@ public class ProfilerClient {
 			String[] top3 = (profilerImpl.getTopThreeUsersBySong(song)).split("\n");
 			long elapsedTime = System.currentTimeMillis() - startTime;
 			StringBuilder result = new StringBuilder();
-			//String initialmessage = ("Song " + song + " (" + elapsedTime + "ms)");
-			//System.out.println(initialmessage);
-			//result.append(initialmessage + "\n");
+			/*
+			 * Enable the below lines if you want to see elapsed time of getTopThreeUsers invocations, it is currently disabled in order to format the topuser.txt correctly *
+			String initialmessage = ("Song " + song + " (" + elapsedTime + "ms)");
+			System.out.println(initialmessage);
+			result.append(initialmessage + "\n"); 
+			*/
 			for (String go : top3) {
 				String[] wow = go.split("\t");
 				String resultline = ("User " + wow[0] + " listened " + wow[2] + " times to song " + wow[1] + ".");
