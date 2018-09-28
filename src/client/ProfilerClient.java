@@ -1,14 +1,20 @@
 package client;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
 
 import org.omg.CORBA.ORB;
+import org.omg.CORBA.portable.StreamableValue;
 import org.omg.CosNaming.NamingContextExt;
 import org.omg.CosNaming.NamingContextExtHelper;
 
 import TasteProfile.Profiler;
 import TasteProfile.ProfilerHelper;
+import TasteProfile.Song;
+import TasteProfile.UserProfile;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -16,6 +22,55 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Scanner;
+
+class SongImpl extends Song {
+	public String id;
+	public long play_count;
+
+	public SongImpl(String pID, int pCount) {
+		id = pID;
+		play_count = pCount;
+	}
+}
+
+class UserProfileImpl extends UserProfile implements Comparable<UserProfileImpl>  {
+	public String id;
+	public long total_play_count = 0;
+	public List<SongImpl> songs = new ArrayList<SongImpl>();
+
+	public UserProfileImpl(String pid) {
+		id = pid;
+	}
+
+	public UserProfileImpl(String pid, long ptotal_play_count) {
+		id = pid;
+		total_play_count = ptotal_play_count;
+		songs = new ArrayList<SongImpl>();
+	}
+
+	public String toString() {
+		String str = "";
+		str += id + " ";
+		str += total_play_count + " ";
+		str += songs.size() + " ";
+		for (int i = 0; i < songs.size(); i++) {
+			str += songs.get(i).id + " " + songs.get(i).play_count + " ";
+		}
+
+		return str;
+	}
+
+	public int compareTo(UserProfileImpl other) {
+		if (total_play_count == other.total_play_count) {
+			return 0;// keep as is
+		} else if (total_play_count > other.total_play_count) {
+			return -1; // this is higher, move up
+		} else {
+			return 1;// this is lower, move down
+		}
+	}
+
+}
 
 public class ProfilerClient {
 
@@ -28,6 +83,8 @@ public class ProfilerClient {
     static final String CMD_READ_INPUT = "inputfile ";
 
 	public static class Input implements Runnable {
+			
+		public UserProfile userp;
 
         public void run() {
         	File file1 = new File("root/../../output.txt");
@@ -138,6 +195,30 @@ public class ProfilerClient {
         }
         
         String timesPlayedByUser (String user, String song) {
+        	//userp = profilerImpl.getUserProfile(user);
+        	long startTime = System.currentTimeMillis();
+        	int timesPlayed = profilerImpl.getTimesPlayedByUser(user, song);
+        	if(userp!= null && userp.id.equals(user)) {
+        		for(Song s : userp.songs) {
+        			if(s.id.equals(song)) {
+        				long elapsedTime = System.currentTimeMillis() - startTime;
+        				return "Song " + song + " played " + s.play_count + " times by user " + user + ".("+ elapsedTime  + "ms)";
+        			}
+        		}
+        	} //else if()
+        	//userp = profilerImpl.getUserProfile(user);
+        	long elapsedTime = System.currentTimeMillis() - startTime;
+        	String result1 = ("Song " + song + " played " + timesPlayed + " times by user " + user + ".("+ elapsedTime  + "ms)");
+        	String result2 = ("Song " + song + " not played by user " + user + ". ("+ elapsedTime  + "ms");
+        	if (timesPlayed != 0) {
+        		System.out.println(result1);
+        		return result1;
+        	} else System.out.println(result2);
+        	return result2;
+        	 
+        }
+        
+        String timesPlayedByUserCacheless (String user, String song) {
         	long startTime = System.currentTimeMillis();
         	int timesPlayed = profilerImpl.getTimesPlayedByUser(user, song);
         	long elapsedTime = System.currentTimeMillis() - startTime;

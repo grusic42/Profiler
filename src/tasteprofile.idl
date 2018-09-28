@@ -36,7 +36,7 @@ public sequence<Song> songs;
     	/* Returns how many times a given song was played by a given user*/
     	long getTimesPlayedByUser(in string user_id, in string song_id);
     	
-    	TopThree getTopThreeUsersBySong(in string song_id);
+    	string getTopThreeUsersBySong(in string song_id);
 		
 		UserProfile getUserProfile (in string user_id);
   	};
