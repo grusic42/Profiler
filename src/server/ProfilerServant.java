@@ -14,8 +14,11 @@ import java.util.List;
 import java.util.Map;
 
 import TasteProfile.ProfilerPOA;
-import TasteProfile.*;
-
+import TasteProfile.Song;
+import TasteProfile.SongProfile;
+import TasteProfile.TopThree;
+import TasteProfile.UserCounter;
+import TasteProfile.UserProfile;
 
 class SongImpl extends Song {
 	public String id;
@@ -27,7 +30,7 @@ class SongImpl extends Song {
 	}
 }
 
-class UserProfileImpl extends UserProfile implements Comparable<UserProfileImpl>  {
+class UserProfileImpl extends UserProfile implements Comparable<UserProfileImpl> {
 	public String id;
 	public long total_play_count = 0;
 	public List<SongImpl> songs = new ArrayList<SongImpl>();
@@ -72,10 +75,10 @@ public class ProfilerServant extends ProfilerPOA {
 
 	public ProfilerServant() {
 		cacheUserProfiles = new ArrayList<UserProfileImpl>();
-		//if (!readCacheUserProfiles()) {
-		//	LoadCacheUserProfiles();
-		//	writeCacheUserProfiles();
-		//}
+		if (!readCacheUserProfiles()) {
+			LoadCacheUserProfiles();
+			writeCacheUserProfiles();
+		}
 	}
 
 	class SongProfileImpl extends SongProfile {
@@ -100,7 +103,7 @@ public class ProfilerServant extends ProfilerPOA {
 		}
 	}
 
-	class TopThreeImpl extends TopThree{
+	class TopThreeImpl extends TopThree {
 		public TopThreeImpl(List<UserCounterImpl> topThreeList) {
 			super();
 			this.topThreeList = topThreeList;
@@ -190,9 +193,9 @@ public class ProfilerServant extends ProfilerPOA {
 				}
 			}
 			/*
-			for (UserCounterImpl u : top3.topThreeList) {
-				System.out.println(u.songid_play_time + " " + u.user_id);
-			}*/
+			 * for (UserCounterImpl u : top3.topThreeList) {
+			 * System.out.println(u.songid_play_time + " " + u.user_id); }
+			 */
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -212,8 +215,10 @@ public class ProfilerServant extends ProfilerPOA {
 	}
 
 	private int checkPlayedCache(String songid) {
-		if (!songCache.isEmpty()) return (songCache.get(songid)).totalPlayCount;
-		else return -1;
+		if (!songCache.isEmpty())
+			return (songCache.get(songid)).totalPlayCount;
+		else
+			return -1;
 	}
 
 	@Override
@@ -255,7 +260,8 @@ public class ProfilerServant extends ProfilerPOA {
 		// try to find answer in cache
 		for (int userIterator = 0; userIterator < cacheUserProfiles.size(); userIterator++) {
 			if (cacheUserProfiles.get(userIterator).id.equals(user_id)) {
-				for (int songIterator = 0; songIterator < cacheUserProfiles.get(userIterator).songs.size(); songIterator++) {
+				for (int songIterator = 0; songIterator < cacheUserProfiles.get(userIterator).songs
+						.size(); songIterator++) {
 					if (cacheUserProfiles.get(userIterator).songs.get(songIterator).id.equals(song_id)) {
 						System.out.println("...[cacheHIT, success]...");
 						return ((int) (cacheUserProfiles.get(userIterator).songs.get(songIterator).play_count));
@@ -354,50 +360,49 @@ public class ProfilerServant extends ProfilerPOA {
 			e.printStackTrace();
 		}
 	}
-	
-	public UserProfileImpl getUserProfile(String user_id){
-		for (UserProfileImpl u : cacheUserProfiles){
-			if (u.id.equals(user_id)){
+
+	public UserProfileImpl getUserProfile(String user_id) {
+		for (UserProfileImpl u : cacheUserProfiles) {
+			if (u.id.equals(user_id)) {
 				System.out.println(u.id);
 				return u;
 			}
 		}
 		BufferedReader br;
 		File file = new File("src/../../train_triplets.txt");
-		
-		
-		UserProfileImpl userP=null;
-		
-		
+
+		UserProfileImpl userP = null;
+
 		String st;
 		try {
 			br = new BufferedReader(new FileReader(file));
 			while ((st = br.readLine()) != null) {
-				String[] tuple = st.split("\t");			
+				String[] tuple = st.split("\t");
 				String userid = tuple[0];
 				String songid = tuple[1];
 				int timesPlayed = Integer.parseInt(tuple[2]);
 				SongImpl song = new SongImpl(songid, timesPlayed);
 				int totalPlayCount = 0;
 				if (userid.equals(user_id)) {
-					if (userP==null) {
-						userP = new UserProfileImpl(userid,timesPlayed);
+					if (userP == null) {
+						userP = new UserProfileImpl(userid, timesPlayed);
 					}
 					userP.songs.add(song);
 					userP.total_play_count += timesPlayed;
 				} else {
-					if(userP != null && userP.songs.size() > 0) {
-						
-						return userP;}
+					if (userP != null && userP.songs.size() > 0) {
+
+						return userP;
 					}
 				}
-			
-		}  catch (IOException e) {
+			}
+
+		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
-		
+
 	}
 
 	boolean readCacheUserProfiles() {
