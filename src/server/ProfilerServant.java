@@ -202,7 +202,6 @@ public class ProfilerServant extends ProfilerPOA {
 		StringBuilder sb = new StringBuilder();
 		for (UserCounter u : tp.topThreeList) {
 			sb.append(u.user_id + "\t" + songid + "\t" + u.songid_play_time + "\n");
-			System.out.println(u.songid_play_time + " " + u.user_id);
 		}
 		System.out.println(sb.toString());
 		return sb.toString();
