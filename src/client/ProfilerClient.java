@@ -1,6 +1,8 @@
 package client;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
 
 import org.omg.CORBA.ORB;
@@ -9,6 +11,7 @@ import org.omg.CosNaming.NamingContextExtHelper;
 
 import TasteProfile.Profiler;
 import TasteProfile.ProfilerHelper;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -130,7 +133,7 @@ public class ProfilerClient {
         	
         	
         }
-        
+       /* 
         String timesPlayedByUser (String user, String song) {
         	long startTime = System.currentTimeMillis();
         	int timesPlayed = profilerImpl.getTimesPlayedByUser(user, song);
@@ -143,7 +146,64 @@ public class ProfilerClient {
         	} else System.out.println(result2);
         	return result2;
         	 
-        }
+        }*/
+        
+        class Song {
+    		public String id;
+    		public long play_count;
+
+    		public Song(String pID, int pCount) {
+    			id = pID;
+    			play_count = pCount;
+    		}
+    	}
+
+    	class UserProfile {
+    		public String id;
+    		public long total_play_count = 0;
+    		public List<Song> songs = new ArrayList<Song>();
+    	 
+    		public UserProfile(String pid) {
+    			id = pid;
+    		}
+
+    		public UserProfile(String pid, long ptotal_play_count) {
+    			id = pid;
+    			total_play_count = ptotal_play_count;
+    			songs = new ArrayList<Song>();
+    		}
+
+    	}
+        
+	String timesPlayedByUser (String user, String song) {
+	        	
+	        	long startTime = System.currentTimeMillis();
+	        	
+	        	String userProfile = profilerImpl.getUserProfile(user);
+	        	System.out.println(userProfile);
+	        	/*
+	        	if(userProfile!= null && userp.id.equals(user)) {
+	        		for(Song s : userp.songs) {
+	        			if(s.id.equals(song)) {
+	        				long elapsedTime = System.currentTimeMillis() - startTime;
+	        				return "Song " + song + " played " + s.play_count + " times by user " + user + ".("+ elapsedTime  + "ms)";
+	        			}
+	        		}
+	        	}
+	        	UserProfile userProfile = profilerImpl.getUserProfile(user);
+				 */
+	        	int timesPlayed = profilerImpl.getTimesPlayedByUser(user, song);
+	
+	        	long elapsedTime = System.currentTimeMillis() - startTime;
+	        	String result1 = ("Song " + song + " played " + timesPlayed + " times by user " + user + ".("+ elapsedTime  + "ms)");
+	        	String result2 = ("Song " + song + " not played by user " + user + ". ("+ elapsedTime  + "ms");
+	        	if (timesPlayed != 0) {
+	        		System.out.println(result1);
+	        		return result1;
+	        	} else System.out.println(result2);
+	        	return result2;
+	        	 
+	}
         
     String topThree(String song) {
 			long startTime = System.currentTimeMillis();
