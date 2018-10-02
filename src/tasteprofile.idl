@@ -1,17 +1,44 @@
 /* This module defines the server interface for the Musical Taste Profile Service. */
 module TasteProfile
 {
+/* Will uncomment and implement together with TopThree getTopThreeUsers.. when getUserProfile is working..
+valuetype UserCounter {
+public string user_id;
+public long songid_play_time;
+};
+
+valuetype TopThree {
+public sequence<UserCounter> topThreeUsers;
+};
+
+valuetype SongProfile {
+public long total_play_count;
+public TopThree top_three_users;
+};
+*/
+valuetype Song {
+public string id;
+public long play_count;
+};
+
+valuetype UserProfile {
+public string id;
+public long total_play_count;
+public sequence<Song> songs;
+};
 
 	/* The service interface with the methods that can be invoked remotely by clients */
   	interface Profiler
   	{
     	/* Returns how many times a given song was played by all the users*/
-		long getTimesPlayed(in string song_id);
+	long getTimesPlayed(in string song_id);
 
     	/* Returns how many times a given song was played by a given user*/
     	long getTimesPlayedByUser(in string user_id, in string song_id);
-
-	/* Returns top 3 users listened to specified song*/
+    	
+	//TopThree getTopThreeUsersBySong(in string song_id);
     	string getTopThreeUsersBySong(in string song_id);
+		
+	UserProfile getUserProfile (in string user_id);
   	};
 };

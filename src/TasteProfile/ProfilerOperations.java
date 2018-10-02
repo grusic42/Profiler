@@ -12,8 +12,6 @@ package TasteProfile;
 /* The service interface with the methods that can be invoked remotely by clients */
 public interface ProfilerOperations 
 {
-  String sendMessage(String message);
-
   /* Returns how many times a given song was played by all the users*/
   int getTimesPlayed (String song_id);
 

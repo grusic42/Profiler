@@ -31,9 +31,7 @@ public class ProfilerServer {
 			String name = "Profiler";
 			NameComponent path[] = ncRef.to_name( name );
 			ncRef.rebind(path, href);
-			
-			profilerImpl.loadCache();
-			
+						
 			System.out.println("Musical taste profiler server ready and waiting ...");
 			
 			orb.run();

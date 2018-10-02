@@ -30,7 +30,7 @@ public class ProfilerClient {
 	public static class Input implements Runnable {
 
         public void run() {
-        	File file = new File("root/../../output.txt");
+        	File file = new File("src/output.txt");
         	try {
 				BufferedWriter writer = new BufferedWriter(new FileWriter(file));
 				writer.write("");
@@ -58,7 +58,7 @@ public class ProfilerClient {
     }
 
         void parse(String str) throws IOException {			
-        	File file = new File("root/../../output.txt");
+        	File file = new File("src/output.txt");
         	BufferedWriter writer = new BufferedWriter(new FileWriter(file, true));
             if (str.startsWith(CMD_TIMES_PLAYED)) {
             	String song = str.substring(CMD_TIMES_PLAYED.length());
@@ -76,7 +76,7 @@ public class ProfilerClient {
             } else if (str.startsWith(CMD_QUIT)) {
             System.exit(0);
         	}else {
-                profilerImpl.sendMessage(str);
+        		
             }
             writer.close();
         }
@@ -87,7 +87,6 @@ public class ProfilerClient {
         	try {
         	String filePath = new String("./src/" + filename);
         	File file = new File(filePath);	
-    		//File file = new File("./src/inputtest.txt");
     		
     		br = new BufferedReader(new FileReader(file));
     		

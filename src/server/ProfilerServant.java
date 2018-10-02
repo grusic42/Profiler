@@ -29,7 +29,7 @@ class UserProfile implements Comparable<UserProfile> {
 	public String id;
 	public long total_play_count = 0;
 	public List<Song> songs = new ArrayList<Song>();
-
+ 
 	public UserProfile(String pid) {
 		id = pid;
 	}
@@ -48,7 +48,6 @@ class UserProfile implements Comparable<UserProfile> {
 		for (int i = 0; i < songs.size(); i++) {
 			str += songs.get(i).id + " " + songs.get(i).play_count + " ";
 		}
-
 		return str;
 	}
 
@@ -69,6 +68,7 @@ public class ProfilerServant extends ProfilerPOA {
 	List<UserProfile> cacheUserProfiles;
 
 	public ProfilerServant() {
+		loadSongCache();
 		cacheUserProfiles = new ArrayList<UserProfile>();
 		if (!readCacheUserProfiles()) {
 			LoadCacheUserProfiles();
@@ -124,7 +124,7 @@ public class ProfilerServant extends ProfilerPOA {
 		public int songid_play_time;
 	}
 
-	public void loadCache() {
+	public void loadSongCache() {
 		BufferedReader br = null;
 		try {
 			File file = new File("src/../../train_triplets.txt");
@@ -189,13 +189,6 @@ public class ProfilerServant extends ProfilerPOA {
 					cache.put(songid, songp);
 				}
 			}
-			songp = cache.get("SODDNQT12A6D4F5F7E");
-			top3 = songp.topThreeUsers;
-			System.out.println(top3.topThreeList.size());
-			System.out.println(songp.totalPlayCount);
-			for (UserCounter u : top3.topThreeList) {
-				System.out.println(u.songid_play_time + " " + u.user_id);
-			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -205,6 +198,7 @@ public class ProfilerServant extends ProfilerPOA {
 	private String checkSongCache(String songid) {
 		SongProfile song = cache.get(songid);
 		TopThree tp = song.topThreeUsers;
+		//return tp;
 		StringBuilder sb = new StringBuilder();
 		for (UserCounter u : tp.topThreeList) {
 			sb.append(u.user_id + "\t" + songid + "\t" + u.songid_play_time + "\n");
@@ -217,12 +211,6 @@ public class ProfilerServant extends ProfilerPOA {
 	private int checkPlayedCache(String songid) {
 		SongProfile song = cache.get(songid);
 		return song.totalPlayCount;
-	}
-
-	@Override
-	public String sendMessage(String message) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	@Override
@@ -279,7 +267,7 @@ public class ProfilerServant extends ProfilerPOA {
 		BufferedReader br = null;
 
 		try {
-			File file = new File("root/../../train_triplets.txt");
+			File file = new File("src/../../train_triplets.txt");
 			br = new BufferedReader(new FileReader(file));
 
 			String st;
@@ -287,7 +275,6 @@ public class ProfilerServant extends ProfilerPOA {
 				String[] tuple = st.split("\t");
 				if (user_id.equals(tuple[0]) && song_id.equals(tuple[1])) {
 					br.close();
-					System.out.println("...[CacheMISS, Failure]...");
 					return Integer.parseInt(tuple[2]);
 				}
 			}
@@ -371,11 +358,10 @@ public class ProfilerServant extends ProfilerPOA {
 		BufferedReader reader;
 		UserProfile tempUserProfile;
 		try {
-			reader = new BufferedReader(new FileReader("root/../../UserProfileCache.txt"));
+			reader = new BufferedReader(new FileReader("src/UserProfileCache.txt"));
 			str = reader.readLine();
 			if (str != null) {
 				if (str.startsWith("Cached UserProfiles")) {
-					System.out.println("...[File read, success]...");
 					cacheUserProfiles = new ArrayList<UserProfile>();
 				} else {
 					reader.close();
@@ -412,7 +398,7 @@ public class ProfilerServant extends ProfilerPOA {
 
 		BufferedWriter writer;
 		try {
-			writer = new BufferedWriter(new FileWriter("root/../../UserProfileCache.txt"));
+			writer = new BufferedWriter(new FileWriter("src/UserProfileCache.txt"));
 
 			writer.write("Cached UserProfiles " + cacheUserProfiles.size() + " entries.");
 			writer.newLine();
@@ -444,9 +430,8 @@ public class ProfilerServant extends ProfilerPOA {
 		String[] tuple;
 
 		try {
-			System.out.println("...[Caching User Profiles]...");
 
-			File file = new File("root/../../train_triplets.txt");
+			File file = new File("src/../../train_triplets.txt");
 
 			br = new BufferedReader(new FileReader(file));
 			st = br.readLine();
