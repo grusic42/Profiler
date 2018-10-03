@@ -204,9 +204,9 @@ public class ProfilerServant extends ProfilerPOA {
 
 		fakeNetworkLatency();
 		// try to find answer in cache
-		for (int userIterator = 0; userIterator < cacheUserProfiles.size(); userIterator++) {
+		/*for (int userIterator = 0; userIterator < cacheUserProfiles.size(); userIterator++) {
 			if (cacheUserProfiles.get(userIterator).id.equals(user_id)) {
-				for (int songIterator = 0; songIterator < 1000; songIterator++) {
+				for (int songIterator = 0; songIterator < 5000; songIterator++) {
 					//1000 = cacheUserProfiles.get(userIterator).songs.size();
 					if (cacheUserProfiles.get(userIterator).songs[songIterator].id.equals(song_id)) {
 						return ((int) (cacheUserProfiles.get(userIterator).songs[songIterator].play_count));
@@ -215,7 +215,17 @@ public class ProfilerServant extends ProfilerPOA {
 				// user found in cache but not song || user input error
 			}
 
+		}*/
+		
+		for (UserProfileImpl u : cacheUserProfiles) {
+			if (u.id.equals(user_id)) {
+				for (int i = 0; i < 5000; i++) {
+					if(u.songs[i].id.equals(song_id))
+						return u.songs[i].play_count;
+				}
+			}
 		}
+		
 		// user not found in cache. try database
 		BufferedReader br = null;
 
@@ -308,12 +318,12 @@ public class ProfilerServant extends ProfilerPOA {
 		
 			fakeNetworkLatency();
 			
-			// Checks if the UserProfile is already in cache.
-			/*for (UserProfileImpl u : cacheUserProfiles) {
+			 //Checks if the UserProfile is already in cache.
+			for (UserProfileImpl u : cacheUserProfiles) {
 				if (u.id.equals(user_id)) {
 					return u;
 				}
-			}*/
+			}
 			// Has to create UserProfile from the data file.
 			BufferedReader br;
 			File file = new File("src/../../train_triplets.txt");
@@ -343,15 +353,7 @@ public class ProfilerServant extends ProfilerPOA {
 							userProfile.songs[index]=song;
 							userProfile.total_play_count += timesPlayed;
 							index++;
-							//break;
 						}
-						//for (int i = 0; i < 5000; i++) {
-						/*	if(userProfile.songs[i]== null) {
-								userProfile.songs[i]=song;
-								userProfile.total_play_count += timesPlayed;
-								break;
-							}*/
-						//}
 					} else {
 						if (userProfile != null && userProfile.songs[0] != null) {
 							return userProfile;
@@ -476,7 +478,7 @@ public class ProfilerServant extends ProfilerPOA {
 			SongImpl song = new SongImpl();
 			song.id=tuple[1];
 			song.play_count= tempPlayTime;
-			for (int i = 0; i < 1000; i++) {
+			for (int i = 0; i < 5000; i++) {
 				if(cacheUserProfiles.get(0).songs[i]== null)
 				cacheUserProfiles.get(0).songs[i]=song;;
 			}
