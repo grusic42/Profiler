@@ -9,6 +9,8 @@ import org.omg.CORBA.ORB;
 import org.omg.CosNaming.NamingContextExt;
 import org.omg.CosNaming.NamingContextExtHelper;
 
+import TasteProfile.Song;
+import TasteProfile.UserProfile;
 import TasteProfile.Profiler;
 import TasteProfile.ProfilerHelper;
 
@@ -133,76 +135,46 @@ public class ProfilerClient {
         	
         	
         }
-       /* 
-        String timesPlayedByUser (String user, String song) {
-        	long startTime = System.currentTimeMillis();
-        	int timesPlayed = profilerImpl.getTimesPlayedByUser(user, song);
-        	long elapsedTime = System.currentTimeMillis() - startTime;
-        	String result1 = ("Song " + song + " played " + timesPlayed + " times by user " + user + ".("+ elapsedTime  + "ms)");
-        	String result2 = ("Song " + song + " not played by user " + user + ". ("+ elapsedTime  + "ms");
-        	if (timesPlayed != 0) {
-        		System.out.println(result1);
-        		return result1;
-        	} else System.out.println(result2);
-        	return result2;
-        	 
-        }*/
+  
+    public UserProfile userProfile;
+    public String searchedUser = "";
         
-        class Song {
-    		public String id;
-    		public long play_count;
-
-    		public Song(String pID, int pCount) {
-    			id = pID;
-    			play_count = pCount;
-    		}
-    	}
-
-    	class UserProfile {
-    		public String id;
-    		public long total_play_count = 0;
-    		public List<Song> songs = new ArrayList<Song>();
-    	 
-    		public UserProfile(String pid) {
-    			id = pid;
-    		}
-
-    		public UserProfile(String pid, long ptotal_play_count) {
-    			id = pid;
-    			total_play_count = ptotal_play_count;
-    			songs = new ArrayList<Song>();
-    		}
-
-    	}
-        
-	String timesPlayedByUser (String user, String song) {
-	        	
+		String timesPlayedByUser (String user, String song) {	
 	        	long startTime = System.currentTimeMillis();
 	        	
-	        	String userProfile = profilerImpl.getUserProfile(user);
-	        	System.out.println(userProfile);
-	        	/*
-	        	if(userProfile!= null && userp.id.equals(user)) {
-	        		for(Song s : userp.songs) {
-	        			if(s.id.equals(song)) {
+	        	// Checks if the same user has recently been used in the same query, and if so calls the getUserProfile method.
+	        	if(user.equals(searchedUser)) {
+	        		userProfile = profilerImpl.getUserProfile(user);
+	        	}
+	        	
+	        	// If the UserProfile is in the client cache
+	        	if(userProfile != null && userProfile.id.equals(user)) {
+
+	        		for(Song s : userProfile.songs) {
+	        			if(song.equals(s.id) || s.id.equals("SOADJQJ12A8C141D38")) {
 	        				long elapsedTime = System.currentTimeMillis() - startTime;
-	        				return "Song " + song + " played " + s.play_count + " times by user " + user + ".("+ elapsedTime  + "ms)";
+	        				String result = "Song " + song + " played " + s.play_count + " times by user " + user + ".("+ elapsedTime  + "ms)";
+	        				System.out.println(result);
+	        				searchedUser = "";
+	        				return result;
 	        			}
 	        		}
 	        	}
-	        	UserProfile userProfile = profilerImpl.getUserProfile(user);
-				 */
-	        	int timesPlayed = profilerImpl.getTimesPlayedByUser(user, song);
-	
+	        	// Does the "normal" getTimesPlayedByUser method, but makes remembers the user for later.
+        		int timesPlayed = profilerImpl.getTimesPlayedByUser(user, song);
+	        	searchedUser = user;
 	        	long elapsedTime = System.currentTimeMillis() - startTime;
 	        	String result1 = ("Song " + song + " played " + timesPlayed + " times by user " + user + ".("+ elapsedTime  + "ms)");
 	        	String result2 = ("Song " + song + " not played by user " + user + ". ("+ elapsedTime  + "ms");
 	        	if (timesPlayed != 0) {
 	        		System.out.println(result1);
 	        		return result1;
-	        	} else System.out.println(result2);
-	        	return result2;
-	        	 
+	        	} 
+	        	else {
+	        		System.out.println(result2);
+	        		return result2;
+	        	}
+	        	
 	}
         
     String topThree(String song) {
@@ -234,8 +206,9 @@ public class ProfilerClient {
 
 			String name = "Profiler";
 			profilerImpl = ProfilerHelper.narrow(ncRef.resolve_str(name));
-
-			System.out.println("Obtained a handle on server object: " + profilerImpl);
+			
+			// Testing: if connection to server
+			//System.out.println("Obtained a handle on server object: " + profilerImpl);
 
 			System.out.println("Welcome to the Musical Taste Profiler\nType \"help\" for help or \"quit\" to quit");
 
