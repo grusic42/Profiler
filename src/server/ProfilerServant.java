@@ -14,9 +14,10 @@ import java.util.List;
 import java.util.Map;
 
 import TasteProfile.ProfilerPOA;
-import TasteProfile.Song;
 import TasteProfile.SongImpl;
-import TasteProfile.UserProfile;
+import TasteProfile.SongProfileImpl;
+import TasteProfile.TopThreeImpl;
+import TasteProfile.UserCounterImpl;
 import TasteProfile.UserProfileImpl;
 
 
@@ -34,53 +35,8 @@ public class ProfilerServant extends ProfilerPOA {
 		}
 	}
 
-	class SongProfile {
-		public int totalPlayCount;
-		public TopThree topThreeUsers;
 
-		public SongProfile(int totalPlayCount, TopThree topThreeUsers) {
-			this.totalPlayCount = totalPlayCount;
-			this.topThreeUsers = topThreeUsers;
-		}
-
-		public TopThree getTopThreeUsers() {
-			return topThreeUsers;
-		}
-
-		public void setTopThreeUsers(TopThree topThreeUsers) {
-			this.topThreeUsers = topThreeUsers;
-		}
-
-		public void setTotalPlayCount(int totalPlayCount) {
-			this.totalPlayCount = totalPlayCount;
-		}
-	}
-
-	class TopThree {
-		public TopThree(List<UserCounter> topThreeList) {
-			super();
-			this.topThreeList = topThreeList;
-		}
-
-		public List<UserCounter> topThreeList;
-
-		public void setTopThreeUsers(List<UserCounter> topThreeList) {
-			this.topThreeList = topThreeList;
-
-		}
-	}
-
-	private Map<String, SongProfile> cache;
-
-	class UserCounter {
-		public UserCounter(String user_id, int songid_play_time) {
-			this.user_id = user_id;
-			this.songid_play_time = songid_play_time;
-		}
-
-		public String user_id;
-		public int songid_play_time;
-	}
+	private Map<String, SongProfileImpl> cache;
 
 	public void loadSongCache() {
 		BufferedReader br = null;
@@ -90,18 +46,21 @@ public class ProfilerServant extends ProfilerPOA {
 
 			cache = new HashMap<>();
 
-			TopThree top3;
-			SongProfile songp;
+			TopThreeImpl top3;
+			SongProfileImpl songp;
 
 			String st;
 			while ((st = br.readLine()) != null) {
 				String[] tuple = st.split("\t");
 				String userid = tuple[0];
+				//int songid = Integer.parseInt(tuple[1]);
 				String songid = tuple[1];
 				int timesPlayed = Integer.parseInt(tuple[2]);
 
-				List<UserCounter> userList = new ArrayList<UserCounter>();
-				UserCounter user = new UserCounter(userid, timesPlayed);
+				List<UserCounterImpl> userList = new ArrayList<UserCounterImpl>();
+				UserCounterImpl user = new UserCounterImpl();
+				user.user_id = userid;
+				user.songid_play_time = timesPlayed;
 
 				// tests if song already exists in cache
 				if ((songp = cache.get(songid)) != null) {
@@ -110,40 +69,43 @@ public class ProfilerServant extends ProfilerPOA {
 					// if the list of users is 1 or 2, it will fill up
 					if (userList.size() < 3) {
 						userList.add(user);
-						Collections.sort(userList, new Comparator<UserCounter>() {
+						Collections.sort(userList, new Comparator<UserCounterImpl>() {
 							@Override
-							public int compare(UserCounter o1, UserCounter o2) {
+							public int compare(UserCounterImpl o1, UserCounterImpl o2) {
 								Integer a1 = o1.songid_play_time;
 								Integer a2 = o2.songid_play_time;
 								return Integer.valueOf(a1).compareTo(Integer.valueOf(a2));
 							}
 						});
-						top3.setTopThreeUsers(userList);
-						songp.setTotalPlayCount(songp.totalPlayCount + timesPlayed);
+						top3.topThreeList = userList;
+						songp.totalPlayCount = (songp.totalPlayCount + timesPlayed);
 						cache.replace(songid, songp);
 					} else {
 						// if 3 users already exists, the one with the least plays, will be replaced
 						if (user.songid_play_time > userList.get(0).songid_play_time) {
 							userList.set(0, user);
-							Collections.sort(userList, new Comparator<UserCounter>() {
+							Collections.sort(userList, new Comparator<UserCounterImpl>() {
 								@Override
-								public int compare(UserCounter o1, UserCounter o2) {
+								public int compare(UserCounterImpl o1, UserCounterImpl o2) {
 									Integer a1 = o1.songid_play_time;
 									Integer a2 = o2.songid_play_time;
 									return Integer.valueOf(a1).compareTo(Integer.valueOf(a2));
 								}
 							});
 						}
-						top3.setTopThreeUsers(userList);
-						songp.setTotalPlayCount(songp.totalPlayCount + timesPlayed);
+						top3.topThreeList = userList;
+						songp.totalPlayCount = (songp.totalPlayCount + timesPlayed);
 						cache.replace(songid, songp);
 					}
 				}
 				// If the song is not yet in the cache
 				else {
 					userList.add(user);
-					top3 = new TopThree(userList);
-					songp = new SongProfile(timesPlayed, top3);
+					top3 = new TopThreeImpl();
+					top3.topThreeList = userList;
+					songp = new SongProfileImpl();
+					songp.totalPlayCount = timesPlayed;
+					songp.topThreeUsers = top3;
 					cache.put(songid, songp);
 				}
 			}
@@ -153,18 +115,18 @@ public class ProfilerServant extends ProfilerPOA {
 
 	}
 
-	private String checkSongCache(String songid) {
-		SongProfile song = cache.get(songid);
-		TopThree tp = song.topThreeUsers;
-		StringBuilder sb = new StringBuilder();
-		for (UserCounter u : tp.topThreeList) {
-			sb.append(u.user_id + "\t" + songid + "\t" + u.songid_play_time + "\n");
-		}
-		return sb.toString();
+	private TopThreeImpl checkSongCache(String songid) {
+		SongProfileImpl song = cache.get(songid);
+		TopThreeImpl tp = song.topThreeUsers;
+//		StringBuilder sb = new StringBuilder();
+//		for (UserCounterImpl u : tp.topThreeList) {
+//			sb.append(u.user_id + "\t" + songid + "\t" + u.songid_play_time + "\n");
+//		}
+		return tp;
 	}
 
 	private int checkPlayedCache(String songid) {
-		SongProfile song = cache.get(songid);
+		SongProfileImpl song = cache.get(songid);
 		return song.totalPlayCount;
 	}
 
@@ -254,11 +216,11 @@ public class ProfilerServant extends ProfilerPOA {
 	}
 
 	@Override
-	public String getTopThreeUsersBySong(String song_id) {
+	public TopThreeImpl getTopThreeUsersBySong(String song_id) {
 
 		BufferedReader br = null;
 		ArrayList<String> matches = new ArrayList<String>();
-		String cache;
+		TopThreeImpl cache;
 		
 		try {
 
@@ -289,15 +251,21 @@ public class ProfilerServant extends ProfilerPOA {
 
 				// Sends back the list's last three users, i.e. the ones who has the most song
 				// plays
-				StringBuilder sb = new StringBuilder();
+				List<UserCounterImpl> topUserCounters = new ArrayList<UserCounterImpl>();
 				for (int i = matches.size() - 3; i < matches.size(); i++) {
 					{
-						sb.append(matches.get(i));
-						sb.append("\n");
+						String line = matches.get(i);
+						String[] splitLine = line.split("\t");
+						UserCounterImpl userC = new UserCounterImpl();
+						userC.user_id = splitLine[0];
+						userC.songid_play_time = Integer.parseInt(splitLine[2]);
+						topUserCounters.add(userC);
 					}
 				}
 				br.close();
-				return sb.toString();
+				TopThreeImpl topThreeUsers = new TopThreeImpl();
+				topThreeUsers.topThreeList = topUserCounters;
+				return topThreeUsers;
 			}
 		} catch (IOException e) {
 

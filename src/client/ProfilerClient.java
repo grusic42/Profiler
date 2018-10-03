@@ -10,6 +10,10 @@ import org.omg.CosNaming.NamingContextExt;
 import org.omg.CosNaming.NamingContextExtHelper;
 
 import TasteProfile.Song;
+import TasteProfile.TopThree;
+import TasteProfile.TopThreeImpl;
+import TasteProfile.UserCounter;
+import TasteProfile.UserCounterImpl;
 import TasteProfile.UserProfile;
 import TasteProfile.Profiler;
 import TasteProfile.ProfilerHelper;
@@ -179,15 +183,16 @@ public class ProfilerClient {
         
     String topThree(String song) {
 			long startTime = System.currentTimeMillis();
-			String[] top3 = (profilerImpl.getTopThreeUsersBySong(song)).split("\n");
+			TopThree top3 = profilerImpl.getTopThreeUsersBySong(song);
 			long elapsedTime = System.currentTimeMillis() - startTime;
 			StringBuilder result = new StringBuilder();
 			String initialmessage = ("Song " + song + " (" + elapsedTime + "ms)");
 			System.out.println(initialmessage);
 			result.append(initialmessage + "\n");
-			for (String go : top3) {
-				String[] wow = go.split("\t");
-				String resultline = ("User " + wow[0] + " listened " + wow[2] + " times.");
+			for (UserCounter go : top3.topThreeUsers) {
+				String userid = go.user_id;
+				int playcount = go.songid_play_time;
+				String resultline = ("User " + userid + " listened " + playcount + " times.");
 				System.out.println(resultline);
 				result.append(resultline + "\n");
 				

@@ -9,7 +9,6 @@ import org.omg.PortableServer.POAHelper;
 
 import TasteProfile.Profiler;
 import TasteProfile.ProfilerHelper;
-import client.ProfilerClient;
 
 public class ProfilerServer {
 
